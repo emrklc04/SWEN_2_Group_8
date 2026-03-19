@@ -1,1 +1,36 @@
-<p>login works!</p>
+<div class="container">
+  <div class="card">
+    <h1>Tour Planner</h1>
+    <p>Login</p>
+    <form (ngSubmit)="login()">
+      <div>
+        <label>Email:</label>
+        <input type="email" [(ngModel)]="email" name="email" [disabled]="loading()" />
+      </div>
+      <div>
+        <label>Password:</label>
+        <input type="password" [(ngModel)]="password" name="password" [disabled]="loading()" />
+      </div>
+      <div *ngIf="message()" [class.error]="messageType()==='error'" [class.success]="messageType()==='success'" class="msg">{{ message() }}</div>
+      <button type="submit" [disabled]="loading()">{{ loading() ? 'Loading...' : 'Login' }}</button>
+    </form>
+  </div>
+</div>
+<div class="container">
+  <div class="card">
+    <h1>Tour Planner</h1>
+    <p>Login</p>
+    <form (ngSubmit)="login()">
+      <div>
+        <label>Email:</label>
+        <input type="email" [(ngModel)]="email" name="email" [disabled]="loading()" />
+      </div>
+      <div>
+        <label>Password:</label>
+        <input type="password" [(ngModel)]="password" name="password" [disabled]="loading()" />
+      </div>
+      <div *ngIf="message()" [class.error]="messageType()==='error'" [class.success]="messageType()==='success'" class="msg">{{ message() }}</div>
+      <button type="submit" [disabled]="loading()">{{ loading() ? 'Loading...' : 'Login' }}</button>
+    </form>
+  </div>
+</div>
