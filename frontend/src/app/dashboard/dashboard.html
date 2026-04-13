@@ -1,1 +1,155 @@
-<p>dashboard works!</p>
+<div class="dashboard">
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">📍</div>
+      <div class="header-info">
+        <h1 class="header-title">Tour Planner</h1>
+        <p class="header-username" *ngIf="currentUser">{{ currentUser()?.email }}</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="profile-button" (click)="goToProfile()" title="View Profile">👤</button>
+      <button class="logout-button" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h2 class="page-title">My Tours</h2>
+      <button class="new-tour-button" (click)="openCreateModal()">+ New Tour</button>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="search-filter-container">
+      <input type="text" class="search-input" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search tours by name, location, or logs...">
+
+      <select class="filter-select" [(ngModel)]="filterMode" (change)="onFilterChange()">
+        <option value="all">All Tours</option>
+        <option value="popularity">Popular (with logs)</option>
+        <option value="childFriendly">Child-Friendly (70+)</option>
+      </select>
+
+      <div class="export-import-buttons">
+        <button class="action-button export" (click)="exportToJson()" title="Export as JSON">⬇ JSON</button>
+        <button class="action-button export" (click)="exportToCsv()" title="Export as CSV">⬇ CSV</button>
+        <label class="action-button import">
+          ⬆ Import
+          <input type="file" hidden accept=".json" (change)="onFileSelected($event)">
+        </label>
+      </div>
+    </div>
+
+    <div class="tours-list" *ngIf="filteredTours().length > 0; else emptyState">
+      <div class="tour-card" *ngFor="let tour of filteredTours()" (click)="viewTour(tour.id)" style="cursor: pointer;">
+        <div class="tour-header">
+          <div class="tour-info">
+            <h3 class="tour-name">{{ tour.name }}</h3>
+            <p class="tour-route">{{ tour.from }} → {{ tour.to }}</p>
+          </div>
+          <div class="tour-actions">
+            <button class="edit-button" (click)="editTour(tour.id, $event)" title="Edit">✎</button>
+            <button class="delete-button" (click)="deleteTour(tour.id, $event)" title="Delete">✕</button>
+          </div>
+        </div>
+        <p class="tour-description" *ngIf="tour.description">{{ tour.description }}</p>
+        <div class="tour-details">
+          <div class="tour-detail">{{ getTransportIcon(tour.transportType) }} {{ tour.transportType }}</div>
+          <div class="tour-detail">📍 {{ formatDistance(tour.distance) }}</div>
+          <div class="tour-detail">⏱ {{ formatTime(tour.estimatedTime) }}</div>
+        </div>
+        <div class="tour-metrics" *ngIf="tour.popularity !== undefined || tour.childFriendliness !== undefined">
+          <span class="metric" *ngIf="tour.popularity !== undefined" title="Number of tour logs">📊 Popularity: {{ tour.popularity }}</span>
+          <span class="metric" *ngIf="tour.childFriendliness !== undefined" [class.child-friendly]="(tour.childFriendliness || 0) >= 70" title="Child-friendliness score (0-100)">👨‍👩‍👧‍👦 Kid-Friendly: {{ tour.childFriendliness }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #emptyState>
+      <div class="empty-state">{{ searchQuery() ? 'No tours match your search.' : 'No tours yet. Create your first tour!' }}</div>
+    </ng-template>
+  </main>
+
+  <div class="modal-overlay" *ngIf="showCreateModal()" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Create New Tour</h2>
+        <button class="close-button" (click)="closeCreateModal()">×</button>
+      </div>
+      <form (ngSubmit)="onSubmitTour()">
+        <div class="form-group">
+          <label class="form-label">Tour Name *</label>
+          <input type="text" class="form-input" [(ngModel)]="tourName" name="tourName" placeholder="e.g., Mountain Trail" required [disabled]="loading()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" [(ngModel)]="tourDescription" name="tourDescription" placeholder="Describe..." rows="3" [disabled]="loading()"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">From *</label>
+            <input type="text" class="form-input" [(ngModel)]="tourFrom" name="tourFrom" required [disabled]="loading()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">To *</label>
+            <input type="text" class="form-input" [(ngModel)]="tourTo" name="tourTo" required [disabled]="loading()" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transport Type *</label>
+          <select class="form-input" [(ngModel)]="tourTransportType" name="tourTransportType" [disabled]="loading()">
+            <option value="car">Car</option>
+            <option value="bike">Bike</option>
+            <option value="foot">Walking</option>
+          </select>
+        </div>
+        <div class="message" *ngIf="message()" [class.success]="messageType()==='success'" [class.error]="messageType()==='error'">{{ message() }}</div>
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeCreateModal()" [disabled]="loading()">Cancel</button>
+          <button type="submit" class="create-button" [disabled]="loading()">{{ loading() ? 'Creating...' : 'Create' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showEditModal()" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Tour</h2>
+        <button class="close-button" (click)="closeEditModal()">×</button>
+      </div>
+      <form (ngSubmit)="onSubmitEditTour()">
+        <div class="form-group">
+          <label class="form-label">Tour Name *</label>
+          <input type="text" class="form-input" [(ngModel)]="tourName" name="tourName" placeholder="e.g., Mountain Trail" required [disabled]="loading()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" [(ngModel)]="tourDescription" name="tourDescription" placeholder="Describe..." rows="3" [disabled]="loading()"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">From *</label>
+            <input type="text" class="form-input" [(ngModel)]="tourFrom" name="tourFrom" required [disabled]="loading()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">To *</label>
+            <input type="text" class="form-input" [(ngModel)]="tourTo" name="tourTo" required [disabled]="loading()" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transport Type *</label>
+          <select class="form-input" [(ngModel)]="tourTransportType" name="tourTransportType" [disabled]="loading()">
+            <option value="car">Car</option>
+            <option value="bike">Bike</option>
+            <option value="foot">Walking</option>
+          </select>
+        </div>
+        <div class="message" *ngIf="message()" [class.success]="messageType()==='success'" [class.error]="messageType()==='error'">{{ message() }}</div>
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeEditModal()" [disabled]="loading()">Cancel</button>
+          <button type="submit" class="create-button" [disabled]="loading()">{{ loading() ? 'Updating...' : 'Update' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
