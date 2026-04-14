@@ -1,0 +1,203 @@
+<div class="tour-detail">
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">📍</div>
+      <div class="header-info">
+        <h1 class="header-title">Tour Planner</h1>
+        <p class="header-username" *ngIf="currentUser">{{ currentUser()?.email }}</p>
+      </div>
+    </div>
+    <button class="logout-button" (click)="logout()">Logout</button>
+  </header>
+
+  <main class="main-content">
+    <div *ngIf="loading()" class="loading">Loading...</div>
+
+    <div *ngIf="!loading() && tour" class="detail-container">
+      <div class="back-button" (click)="backToDashboard()">
+        <span>←</span> Back to Tours
+      </div>
+
+      <div class="detail-grid">
+        <div class="left-section">
+          <div class="tour-info-card">
+            <h2 class="tour-name">{{ tour.name }}</h2>
+            <p class="tour-description" *ngIf="tour.description">{{ tour.description }}</p>
+
+            <div class="info-row">
+              <div class="info-group">
+                <label>From</label>
+                <p>{{ tour.from }}</p>
+              </div>
+              <div class="info-group">
+                <label>To</label>
+                <p>{{ tour.to }}</p>
+              </div>
+            </div>
+
+            <div class="metrics-row">
+              <div class="metric">
+                <span class="metric-icon">📍</span>
+                <div>
+                  <p class="metric-label">Distance</p>
+                  <p class="metric-value">{{ formatDistance(tour.distance) }}</p>
+                </div>
+              </div>
+              <div class="metric">
+                <span class="metric-icon">⏱</span>
+                <div>
+                  <p class="metric-label">Estimated Time</p>
+                  <p class="metric-value">{{ formatTime(tour.estimatedTime) }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="transport-row">
+              <span class="transport-badge">{{ getTransportIcon(tour.transportType) }} {{ tour.transportType | uppercase }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-section">
+          <div class="map-container">
+            <h3>Route Map</h3>
+            <div #mapContainer id="map"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="logs-section">
+        <div class="logs-header">
+          <h3>Tour Logs</h3>
+          <button class="add-log-button" (click)="openLogModal()">+ Add Log</button>
+        </div>
+        <div class="logs-content" *ngIf="tourLogs().length > 0; else noLogs">
+          <div class="log-item" *ngFor="let log of tourLogs()">
+            <div class="log-header">
+              <div class="log-info">
+                <div class="log-date">📅 {{ formatLogDate(log.dateTime) }}</div>
+                <div class="log-difficulty">{{ getDifficultyIcon(log.difficulty) }} {{ log.difficulty | uppercase }}</div>
+                <div class="log-rating">{{ getRatingStars(log.rating) }}</div>
+              </div>
+              <div class="log-actions">
+                <button class="edit-log-btn" (click)="openEditLogModal(log.id)" title="Edit">✎</button>
+                <button class="delete-log-btn" (click)="deleteTourLog(log.id, $event)" title="Delete">✕</button>
+              </div>
+            </div>
+            <p class="log-comment">💬 {{ log.comment }}</p>
+            <div class="log-stats">
+              <div class="log-stat">📍 {{ log.totalDistance }} km</div>
+              <div class="log-stat">⏱ {{ formatTime(log.totalTime) }}</div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noLogs>
+          <p class="no-logs">No logs yet. Add your first tour log!</p>
+        </ng-template>
+      </div>
+    </div>
+
+    <div *ngIf="!loading() && !tour" class="error-message">
+      <p>Tour not found</p>
+      <button (click)="backToDashboard()">Back to Dashboard</button>
+    </div>
+  </main>
+
+  <!-- Create Tour Log Modal -->
+  <div class="modal-overlay" *ngIf="showLogModal()" (click)="closeLogModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Create Tour Log</h2>
+        <button class="close-button" (click)="closeLogModal()">×</button>
+      </div>
+      <form (ngSubmit)="onSubmitTourLog()">
+        <div class="form-group">
+          <label class="form-label">Date & Time *</label>
+          <input type="datetime-local" class="form-input" [(ngModel)]="logDateTime" name="logDateTime" required [disabled]="logLoading()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Comment *</label>
+          <textarea class="form-input" [(ngModel)]="logComment" name="logComment" placeholder="Describe your experience..." rows="3" required [disabled]="logLoading()"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Difficulty *</label>
+            <select class="form-input" [(ngModel)]="logDifficulty" name="logDifficulty" [disabled]="logLoading()">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rating (1-5) *</label>
+            <input type="number" class="form-input" [(ngModel)]="logRating" name="logRating" min="1" max="5" required [disabled]="logLoading()" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Total Distance (km) *</label>
+            <input type="number" class="form-input" [(ngModel)]="logTotalDistance" name="logTotalDistance" step="0.1" required [disabled]="logLoading()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Total Time (minutes) *</label>
+            <input type="number" class="form-input" [(ngModel)]="logTotalTime" name="logTotalTime" required [disabled]="logLoading()" />
+          </div>
+        </div>
+        <div class="message" *ngIf="logMessage()" [class.success]="logMessageType()==='success'" [class.error]="logMessageType()==='error'">{{ logMessage() }}</div>
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeLogModal()" [disabled]="logLoading()">Cancel</button>
+          <button type="submit" class="create-button" [disabled]="logLoading()">{{ logLoading() ? 'Creating...' : 'Create Log' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Tour Log Modal -->
+  <div class="modal-overlay" *ngIf="showEditLogModal()" (click)="closeEditLogModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Tour Log</h2>
+        <button class="close-button" (click)="closeEditLogModal()">×</button>
+      </div>
+      <form (ngSubmit)="onSubmitEditTourLog()">
+        <div class="form-group">
+          <label class="form-label">Date & Time *</label>
+          <input type="datetime-local" class="form-input" [(ngModel)]="logDateTime" name="logDateTime" required [disabled]="logLoading()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Comment *</label>
+          <textarea class="form-input" [(ngModel)]="logComment" name="logComment" placeholder="Describe your experience..." rows="3" required [disabled]="logLoading()"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Difficulty *</label>
+            <select class="form-input" [(ngModel)]="logDifficulty" name="logDifficulty" [disabled]="logLoading()">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rating (1-5) *</label>
+            <input type="number" class="form-input" [(ngModel)]="logRating" name="logRating" min="1" max="5" required [disabled]="logLoading()" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Total Distance (km) *</label>
+            <input type="number" class="form-input" [(ngModel)]="logTotalDistance" name="logTotalDistance" step="0.1" required [disabled]="logLoading()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Total Time (minutes) *</label>
+            <input type="number" class="form-input" [(ngModel)]="logTotalTime" name="logTotalTime" required [disabled]="logLoading()" />
+          </div>
+        </div>
+        <div class="message" *ngIf="logMessage()" [class.success]="logMessageType()==='success'" [class.error]="logMessageType()==='error'">{{ logMessage() }}</div>
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" (click)="closeEditLogModal()" [disabled]="logLoading()">Cancel</button>
+          <button type="submit" class="create-button" [disabled]="logLoading()">{{ logLoading() ? 'Updating...' : 'Update Log' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
