@@ -11,9 +11,8 @@ export interface SearchResult {
 })
 export class SearchService {
 
-   /**
-    * Durchführt eine Full-Text-Suche in Tours und Tour-Logs
-    */
+   //Durchführt eine Full-Text-Suche in Tours und Tour-Logs
+
    searchTours(query: string, tours: Tour[], logs: TourLog[]): SearchResult {
      if (!query?.trim()) return { tours: [], totalResults: 0 };
 
@@ -50,16 +49,12 @@ export class SearchService {
      return { tours: results, totalResults: results.length };
    }
 
-  /**
-   * Berechnet die Popularität einer Tour basierend auf der Anzahl der Tour-Logs
-   */
+  //Berechnet die Popularität einer Tour basierend auf der Anzahl der Tour-Logs
   calculatePopularity(tourId: string, logs: TourLog[]): number {
     return logs.filter(log => log.tourId === tourId).length;
   }
 
-   /**
-    * Berechnet die Kinderfreundlichkeit (0-100)
-    */
+   //Berechnet die Kinderfreundlichkeit (0-100)
    calculateChildFriendliness(tourId: string, logs: TourLog[], tour: Tour): number {
      const tourLogs = logs.filter(log => log.tourId === tourId);
 
@@ -92,9 +87,7 @@ export class SearchService {
      return Math.round(Math.max(0, Math.min(100, result)));
    }
 
-  /**
-   * Filtert Tours nach Bewertung (beliebte vs. unpopuläre)
-   */
+  //Filtert Tours nach Bewertung (beliebte vs. unpopuläre)
   filterByPopularity(tours: Tour[], minLogs: number = 0, maxLogs?: number): Tour[] {
     return tours.filter(tour => {
       const popularity = tour.popularity || 0;
@@ -105,9 +98,7 @@ export class SearchService {
     });
   }
 
-  /**
-   * Filtert Tours nach Kinderfreundlichkeit
-   */
+  //Filtert Tours nach Kinderfreundlichkeit
   filterByChildFriendliness(tours: Tour[], minScore: number = 0, maxScore: number = 100): Tour[] {
     return tours.filter(tour => {
       const score = tour.childFriendliness || 0;

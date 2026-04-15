@@ -10,15 +10,15 @@ export class TourLogService {
   private tourLogsSubject = new BehaviorSubject<TourLog[]>(this.loadTourLogs());
   public tourLogs$ = this.tourLogsSubject.asObservable();
 
-  getTourLogsByTourId(tourId: string): TourLog[] {
+  /*getTourLogsByTourId(tourId: string): TourLog[] {
     return this.getTourLogs().filter(log => log.tourId === tourId);
-  }
+  }*/
 
   getTourLogs(): TourLog[] { return this.tourLogsSubject.value; }
 
-  getTourLogById(logId: string): TourLog | undefined {
+  /*getTourLogById(logId: string): TourLog | undefined {
     return this.getTourLogs().find(log => log.id === logId);
-  }
+  }*/
 
   private validateLogDto(logDto: CreateTourLogDto): { valid: boolean; message: string } {
     if (logDto.rating < 1 || logDto.rating > 5) return { valid: false, message: 'Rating must be between 1 and 5.' };

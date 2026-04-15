@@ -61,9 +61,9 @@ export class AuthService {
     this.isLoggedInSubject.next(false);
   }
 
-  isLoggedIn(): boolean {
+  /*isLoggedIn(): boolean {
     return this.checkLoggedIn();
-  }
+  }*/
 
   getCurrentUser(): User | null {
     const user = localStorage.getItem(this.CURRENT_USER_KEY);
