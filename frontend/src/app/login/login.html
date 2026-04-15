@@ -13,6 +13,10 @@
       </div>
       <div *ngIf="message()" [class.error]="messageType()==='error'" [class.success]="messageType()==='success'" class="msg">{{ message() }}</div>
       <button type="submit" [disabled]="loading()">{{ loading() ? 'Loading...' : 'Login' }}</button>
+      <p class="switch-text">
+        No account yet?
+        <a routerLink="/register">Register here</a>
+      </p>
     </form>
   </div>
 </div>
