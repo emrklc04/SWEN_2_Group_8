@@ -1,155 +1,136 @@
-<div class="dashboard">
-  <header class="header">
-    <div class="header-left">
-      <div class="logo">📍</div>
-      <div class="header-info">
-        <h1 class="header-title">Tour Planner</h1>
-        <p class="header-username" *ngIf="currentUser">{{ currentUser()?.email }}</p>
+<div class="d-flex flex-column min-vh-100">
+  <!-- Header -->
+  <header class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <div class="container-fluid px-3">
+      <div class="navbar-brand d-flex align-items-center gap-2">
+        <div class="bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 4px;">📍</div>
+        <div>
+          <h1 class="mb-0" style="font-size: 16px; font-weight: bold;">Tour Planner</h1>
+          <p class="mb-0 text-muted" style="font-size: 12px;" *ngIf="currentUser">{{ currentUser()?.email }}</p>
+        </div>
       </div>
-    </div>
-    <div class="header-right">
-      <button class="profile-button" (click)="goToProfile()" title="View Profile">👤</button>
-      <button class="logout-button" (click)="logout()">Logout</button>
+      <div class="ms-auto d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary" (click)="goToProfile()" title="View Profile">👤</button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="logout()">Logout</button>
+      </div>
     </div>
   </header>
 
-  <main class="main-content">
-    <div class="page-header">
-      <h2 class="page-title">My Tours</h2>
-      <button class="new-tour-button" (click)="openCreateModal()">+ New Tour</button>
-    </div>
-
-    <!-- Search and Filter Section -->
-    <div class="search-filter-container">
-      <input type="text" class="search-input" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search tours by name, location, or logs...">
-
-      <select class="filter-select" [(ngModel)]="filterMode" (change)="onFilterChange()">
-        <option value="all">All Tours</option>
-        <option value="popularity">Popular (with logs)</option>
-        <option value="childFriendly">Child-Friendly (70+)</option>
-      </select>
-
-      <div class="export-import-buttons">
-        <button class="action-button export" (click)="exportToJson()" title="Export as JSON">⬇ JSON</button>
-        <button class="action-button export" (click)="exportToCsv()" title="Export as CSV">⬇ CSV</button>
-        <label class="action-button import">
-          ⬆ Import
-          <input type="file" hidden accept=".json" (change)="onFileSelected($event)">
-        </label>
-      </div>
-    </div>
-
-    <div class="tours-list" *ngIf="filteredTours().length > 0; else emptyState">
-      <div class="tour-card" *ngFor="let tour of filteredTours()" (click)="viewTour(tour.id)" style="cursor: pointer;">
-        <div class="tour-header">
-          <div class="tour-info">
-            <h3 class="tour-name">{{ tour.name }}</h3>
-            <p class="tour-route">{{ tour.from }} → {{ tour.to }}</p>
-          </div>
-          <div class="tour-actions">
-            <button class="edit-button" (click)="editTour(tour.id, $event)" title="Edit">✎</button>
-            <button class="delete-button" (click)="deleteTour(tour.id, $event)" title="Delete">✕</button>
-          </div>
+  <!-- Main Content -->
+  <main class="flex-grow-1 p-4">
+    <div class="container-fluid">
+      <!-- Page Header -->
+      <div class="row mb-4">
+        <div class="col">
+          <h2 class="display-6 mb-0">My Tours</h2>
         </div>
-        <p class="tour-description" *ngIf="tour.description">{{ tour.description }}</p>
-        <div class="tour-details">
-          <div class="tour-detail">{{ getTransportIcon(tour.transportType) }} {{ tour.transportType }}</div>
-          <div class="tour-detail">📍 {{ formatDistance(tour.distance) }}</div>
-          <div class="tour-detail">⏱ {{ formatTime(tour.estimatedTime) }}</div>
-        </div>
-        <div class="tour-metrics" *ngIf="tour.popularity !== undefined || tour.childFriendliness !== undefined">
-          <span class="metric" *ngIf="tour.popularity !== undefined" title="Number of tour logs">📊 Popularity: {{ tour.popularity }}</span>
-          <span class="metric" *ngIf="tour.childFriendliness !== undefined" [class.child-friendly]="(tour.childFriendliness || 0) >= 70" title="Child-friendliness score (0-100)">👨‍👩‍👧‍👦 Kid-Friendly: {{ tour.childFriendliness }}%</span>
+        <div class="col-auto">
+          <button class="btn btn-dark" (click)="openCreateModal()">+ New Tour</button>
         </div>
       </div>
-    </div>
 
-    <ng-template #emptyState>
-      <div class="empty-state">{{ searchQuery() ? 'No tours match your search.' : 'No tours yet. Create your first tour!' }}</div>
-    </ng-template>
+      <!-- Search and Filter Section -->
+      <div class="row gap-3 mb-4">
+        <div class="col-12 col-md-auto flex-grow-1">
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search tours by name, location, or logs...">
+        </div>
+        <div class="col-12 col-md-auto">
+          <select class="form-select form-select-sm" [(ngModel)]="filterMode" (change)="onFilterChange()">
+            <option value="all">All Tours</option>
+            <option value="popularity">Popular (with logs)</option>
+            <option value="childFriendly">Child-Friendly (70+)</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-auto d-flex gap-1">
+          <button class="btn btn-sm btn-success" (click)="exportToJson()" title="Export as JSON">⬇ JSON</button>
+          <button class="btn btn-sm btn-success" (click)="exportToCsv()" title="Export as CSV">⬇ CSV</button>
+          <label class="btn btn-sm btn-success mb-0">
+            ⬆ Import
+            <input type="file" hidden accept=".json" (change)="onFileSelected($event)">
+          </label>
+        </div>
+      </div>
+
+      <!-- Tours Grid -->
+      <div class="row g-4" *ngIf="filteredTours().length > 0; else emptyState">
+        <div class="col-12 col-md-6 col-lg-4" *ngFor="let tour of filteredTours()">
+          <div class="card tour-card h-100 shadow-sm" (click)="viewTour(tour.id)" style="cursor: pointer;">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <h5 class="card-title mb-1">{{ tour.name }}</h5>
+                  <p class="text-muted mb-0" style="font-size: 12px;">{{ tour.from }} → {{ tour.to }}</p>
+                </div>
+                <div class="d-flex gap-1">
+                  <button class="btn btn-link btn-sm text-primary p-0" (click)="editTour(tour.id, $event)" title="Edit">✎</button>
+                  <button class="btn btn-link btn-sm text-danger p-0" (click)="deleteTour(tour.id, $event)" title="Delete">✕</button>
+                </div>
+              </div>
+              <p class="card-text text-muted" *ngIf="tour.description" style="font-size: 13px; line-height: 1.4;">{{ tour.description }}</p>
+              <div class="small text-muted mb-3">
+                <span>{{ getTransportIcon(tour.transportType) }} {{ tour.transportType }}</span>
+                <span class="ms-2">📍 {{ formatDistance(tour.distance) }}</span>
+                <span class="ms-2">⏱ {{ formatTime(tour.estimatedTime) }}</span>
+              </div>
+              <div class="d-flex flex-wrap gap-1" *ngIf="tour.popularity !== undefined || tour.childFriendliness !== undefined">
+                <span class="metric-badge" *ngIf="tour.popularity !== undefined" title="Number of tour logs">📊 Popularity: {{ tour.popularity }}</span>
+                <span class="metric-badge" [class.child-friendly]="(tour.childFriendliness || 0) >= 70" *ngIf="tour.childFriendliness !== undefined" title="Child-friendliness score (0-100)">👨‍👩‍👧‍👦 Kid-Friendly: {{ tour.childFriendliness }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #emptyState>
+        <div class="alert alert-info text-center py-5">{{ searchQuery() ? 'No tours match your search.' : 'No tours yet. Create your first tour!' }}</div>
+      </ng-template>
+    </div>
   </main>
 
-  <div class="modal-overlay" *ngIf="showCreateModal()" (click)="closeCreateModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Create New Tour</h2>
-        <button class="close-button" (click)="closeCreateModal()">×</button>
-      </div>
-      <form (ngSubmit)="onSubmitTour()">
-        <div class="form-group">
-          <label class="form-label">Tour Name *</label>
-          <input type="text" class="form-input" [(ngModel)]="tourName" name="tourName" placeholder="e.g., Mountain Trail" required [disabled]="loading()" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Description</label>
-          <textarea class="form-input" [(ngModel)]="tourDescription" name="tourDescription" placeholder="Describe..." rows="3" [disabled]="loading()"></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">From *</label>
-            <input type="text" class="form-input" [(ngModel)]="tourFrom" name="tourFrom" required [disabled]="loading()" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">To *</label>
-            <input type="text" class="form-input" [(ngModel)]="tourTo" name="tourTo" required [disabled]="loading()" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Transport Type *</label>
-          <select class="form-input" [(ngModel)]="tourTransportType" name="tourTransportType" [disabled]="loading()">
-            <option value="car">Car</option>
-            <option value="bike">Bike</option>
-            <option value="foot">Walking</option>
-          </select>
-        </div>
-        <div class="message" *ngIf="message()" [class.success]="messageType()==='success'" [class.error]="messageType()==='error'">{{ message() }}</div>
-        <div class="modal-actions">
-          <button type="button" class="cancel-button" (click)="closeCreateModal()" [disabled]="loading()">Cancel</button>
-          <button type="submit" class="create-button" [disabled]="loading()">{{ loading() ? 'Creating...' : 'Create' }}</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="modal-overlay" *ngIf="showEditModal()" (click)="closeEditModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Edit Tour</h2>
-        <button class="close-button" (click)="closeEditModal()">×</button>
-      </div>
-      <form (ngSubmit)="onSubmitEditTour()">
-        <div class="form-group">
-          <label class="form-label">Tour Name *</label>
-          <input type="text" class="form-input" [(ngModel)]="tourName" name="tourName" placeholder="e.g., Mountain Trail" required [disabled]="loading()" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Description</label>
-          <textarea class="form-input" [(ngModel)]="tourDescription" name="tourDescription" placeholder="Describe..." rows="3" [disabled]="loading()"></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">From *</label>
-            <input type="text" class="form-input" [(ngModel)]="tourFrom" name="tourFrom" required [disabled]="loading()" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">To *</label>
-            <input type="text" class="form-input" [(ngModel)]="tourTo" name="tourTo" required [disabled]="loading()" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Transport Type *</label>
-          <select class="form-input" [(ngModel)]="tourTransportType" name="tourTransportType" [disabled]="loading()">
-            <option value="car">Car</option>
-            <option value="bike">Bike</option>
-            <option value="foot">Walking</option>
-          </select>
-        </div>
-        <div class="message" *ngIf="message()" [class.success]="messageType()==='success'" [class.error]="messageType()==='error'">{{ message() }}</div>
-        <div class="modal-actions">
-          <button type="button" class="cancel-button" (click)="closeEditModal()" [disabled]="loading()">Cancel</button>
-          <button type="submit" class="create-button" [disabled]="loading()">{{ loading() ? 'Updating...' : 'Update' }}</button>
-        </div>
-      </form>
-    </div>
-  </div>
+   <!-- Create/Edit Tour Modal -->
+   <ng-container *ngFor="let isEdit of [false, true]">
+     <div class="modal fade" *ngIf="(isEdit ? showEditModal() : showCreateModal())" [attr.data-edit]="isEdit" (click)="isEdit ? closeEditModal() : closeCreateModal()" [class.show]="true" style="display: block; background: rgba(0, 0, 0, 0.3);">
+       <div class="modal-dialog" (click)="$event.stopPropagation()">
+         <div class="modal-content">
+           <div class="modal-header">
+             <h5 class="modal-title">{{ isEdit ? 'Edit' : 'Create New' }} Tour</h5>
+             <button type="button" class="btn-close" (click)="isEdit ? closeEditModal() : closeCreateModal()"></button>
+           </div>
+            <form (ngSubmit)="isEdit ? onSubmitEditTour() : onSubmitTour()" class="modal-body">
+             <div class="mb-3">
+               <label class="form-label fw-bold">Tour Name *</label>
+               <input type="text" class="form-control" [(ngModel)]="tourName" name="tourName" placeholder="e.g., Mountain Trail" required [disabled]="loading()" />
+             </div>
+             <div class="mb-3">
+               <label class="form-label fw-bold">Description</label>
+               <textarea class="form-control" [(ngModel)]="tourDescription" name="tourDescription" placeholder="Describe..." rows="3" [disabled]="loading()"></textarea>
+             </div>
+             <div class="row">
+               <div class="col-6 mb-3">
+                 <label class="form-label fw-bold">From *</label>
+                 <input type="text" class="form-control" [(ngModel)]="tourFrom" name="tourFrom" required [disabled]="loading()" />
+               </div>
+               <div class="col-6 mb-3">
+                 <label class="form-label fw-bold">To *</label>
+                 <input type="text" class="form-control" [(ngModel)]="tourTo" name="tourTo" required [disabled]="loading()" />
+               </div>
+             </div>
+             <div class="mb-3">
+               <label class="form-label fw-bold">Transport Type *</label>
+               <select class="form-select" [(ngModel)]="tourTransportType" name="tourTransportType" [disabled]="loading()">
+                 <option value="car">Car</option>
+                 <option value="bike">Bike</option>
+                 <option value="foot">Walking</option>
+               </select>
+             </div>
+             <div class="alert" *ngIf="message()" [class.alert-success]="messageType()==='success'" [class.alert-danger]="messageType()==='error'">{{ message() }}</div>
+             <div class="d-flex gap-2">
+               <button type="button" class="btn btn-secondary flex-grow-1" (click)="isEdit ? closeEditModal() : closeCreateModal()" [disabled]="loading()">Cancel</button>
+               <button type="submit" class="btn btn-dark flex-grow-1" [disabled]="loading()">{{ loading() ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Update' : 'Create') }}</button>
+             </div>
+           </form>
+         </div>
+       </div>
+     </div>
+   </ng-container>
 </div>

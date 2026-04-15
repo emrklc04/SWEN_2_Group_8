@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { TourService } from '../services/tour.service';
 import { TourLogService } from '../services/tour-log.service';
 import { AuthService } from '../services/auth.service';
+import { RouteService } from '../services/route.service';
 import { Tour, TourLog } from '../models/tour.model';
 import * as L from 'leaflet';
 
@@ -41,13 +42,14 @@ export class TourDetail implements OnInit {
   logTotalTime = signal(0);
   logRating = signal(3);
 
-  constructor(
-    private tourService: TourService,
-    private tourLogService: TourLogService,
-    private authService: AuthService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+   constructor(
+     private tourService: TourService,
+     private tourLogService: TourLogService,
+     private authService: AuthService,
+     private routeService: RouteService,
+     private router: Router,
+     private route: ActivatedRoute
+   ) {}
 
   ngOnInit(): void {
     this.currentUser.set(this.authService.getCurrentUser());
@@ -60,59 +62,98 @@ export class TourDetail implements OnInit {
     });
   }
 
-  loadTour(id: string): void {
-    this.tourService.getTourById(id).subscribe(
-      (tour: Tour) => {
-        this.tour = tour;
-        this.loading.set(false);
-        setTimeout(() => this.initMap(), 100);
-      },
-      (error) => {
-        console.error('Error loading tour:', error);
-        this.loading.set(false);
-        this.router.navigate(['/dashboard']);
-      }
-    );
-  }
+   loadTour(id: string): void {
+     this.tourService.getTourById(id).subscribe(
+       async (tour: Tour) => {
+         this.tour = tour;
 
-  loadTourLogs(tourId: string): void {
-    this.tourLogService.tourLogs$.subscribe(logs => {
-      this.tourLogs.set(logs.filter((log: TourLog) => log.tourId === tourId));
-    });
-  }
+         // Rufe OpenRouteService API auf für Distance, Time und Coordinates
+         if (tour.from && tour.to) {
+           try {
+             const routeData = await this.routeService.getRoute(
+               tour.from,
+               tour.to,
+               tour.transportType
+             );
 
-  initMap(): void {
-    if (!this.mapContainer || !this.tour) return;
+             if (routeData.success) {
+               // Update tour mit echten Daten von OpenRouteService API
+               this.tour = {
+                 ...tour,
+                 distance: routeData.distance,
+                 estimatedTime: routeData.duration,
+                 routeInformation: {
+                   coordinates: routeData.coordinates,
+                   bbox: this.calculateBBox(routeData.coordinates)
+                 }
+               };
+               console.log('✓ Route-Daten von OpenRouteService API geladen:', {
+                 distance: this.tour.distance,
+                 duration: this.tour.estimatedTime,
+                 coordinates: this.tour.routeInformation.coordinates.length
+               });
+             }
+           } catch (error) {
+             console.error('Fehler beim Laden der Route von OpenRouteService:', error);
+           }
+         }
 
-    this.map = L.map(this.mapContainer.nativeElement).setView([51.505, -0.09], 4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19
-    }).addTo(this.map);
+         this.loading.set(false);
+         setTimeout(() => this.initMap(), 200);
+       },
+       (error) => {
+         console.error('Error loading tour:', error);
+         this.loading.set(false);
+         this.router.navigate(['/dashboard']);
+       }
+     );
+   }
 
-    this.displayRoute();
-  }
+   private calculateBBox(coordinates: [number, number][]): number[] {
+     if (coordinates.length === 0) return [0, 0, 0, 0];
 
-  displayRoute(): void {
-    if (!this.tour?.routeInformation?.coordinates || this.tour.routeInformation.coordinates.length === 0) {
-      L.marker([51.505, -0.09]).addTo(this.map).bindPopup(`${this.tour?.from} → ${this.tour?.to}`);
-      return;
-    }
+     let minLon = coordinates[0][0];
+     let maxLon = coordinates[0][0];
+     let minLat = coordinates[0][1];
+     let maxLat = coordinates[0][1];
 
-    const latLngs = this.tour.routeInformation.coordinates;
+     for (const [lon, lat] of coordinates) {
+       minLon = Math.min(minLon, lon);
+       maxLon = Math.max(maxLon, lon);
+       minLat = Math.min(minLat, lat);
+       maxLat = Math.max(maxLat, lat);
+     }
 
-    L.polyline(latLngs, { color: '#667eea', weight: 3 }).addTo(this.map);
+     return [minLon, minLat, maxLon, maxLat];
+   }
 
-    if (latLngs.length > 0) {
-      L.marker([latLngs[0][0], latLngs[0][1]]).addTo(this.map).bindPopup(this.tour?.from || 'Start');
-      L.marker([latLngs[latLngs.length - 1][0], latLngs[latLngs.length - 1][1]]).addTo(this.map).bindPopup(this.tour?.to || 'End');
+   loadTourLogs(tourId: string): void {
+     this.tourLogs.set(this.tourLogService.getTourLogs().filter(log => log.tourId === tourId));
+   }
 
-      const bounds = L.latLngBounds(latLngs);
-      this.map.fitBounds(bounds, { padding: [50, 50] });
-    }
-  }
 
-  // Tour Log Modal Methods
+   initMap(): void {
+     if (!this.mapContainer || !this.tour) return;
+     this.map = L.map(this.mapContainer.nativeElement).setView([51.505, -0.09], 4);
+     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 19 }).addTo(this.map);
+     this.displayRoute();
+   }
+
+   displayRoute(): void {
+     if (!this.tour?.routeInformation?.coordinates || this.tour.routeInformation.coordinates.length === 0) {
+       L.marker([51.505, -0.09]).addTo(this.map).bindPopup(`${this.tour?.from} → ${this.tour?.to}`);
+       return;
+     }
+     const latLngs = this.tour.routeInformation.coordinates;
+     L.polyline(latLngs, { color: '#667eea', weight: 3 }).addTo(this.map);
+     if (latLngs.length > 0) {
+       L.marker([latLngs[0][0], latLngs[0][1]]).addTo(this.map).bindPopup(this.tour?.from || 'Start');
+       L.marker([latLngs[latLngs.length - 1][0], latLngs[latLngs.length - 1][1]]).addTo(this.map).bindPopup(this.tour?.to || 'End');
+       this.map.fitBounds(L.latLngBounds(latLngs), { padding: [50, 50] });
+     }
+   }
+
+   // Tour Log Modal Methods
   openLogModal(): void {
     this.showLogModal.set(true);
     this.resetLogForm();
@@ -154,141 +195,105 @@ export class TourDetail implements OnInit {
     this.logLoading.set(false);
   }
 
-  async onSubmitTourLog(): Promise<void> {
-    this.logLoading.set(true);
-    this.logMessage.set('');
+   async onSubmitTourLog(): Promise<void> {
+     this.logLoading.set(true);
+     this.logMessage.set('');
 
-    if (!this.logDateTime() || !this.logComment() || this.logTotalDistance() <= 0 || this.logTotalTime() <= 0) {
-      this.logMessage.set('Please fill in all required fields.');
-      this.logMessageType.set('error');
-      this.logLoading.set(false);
-      return;
-    }
+     if (!this.logDateTime() || !this.logComment() || this.logTotalDistance() <= 0 || this.logTotalTime() <= 0 || this.logRating() < 1 || this.logRating() > 5) {
+       this.logMessage.set('Please fill in all required fields correctly.');
+       this.logMessageType.set('error');
+       this.logLoading.set(false);
+       return;
+     }
 
-    if (this.logRating() < 1 || this.logRating() > 5) {
-      this.logMessage.set('Rating must be between 1 and 5.');
-      this.logMessageType.set('error');
-      this.logLoading.set(false);
-      return;
-    }
+     const result = await this.tourLogService.createTourLog(this.tour?.id || '', {
+       dateTime: new Date(this.logDateTime()),
+       comment: this.logComment(),
+       difficulty: this.logDifficulty(),
+       totalDistance: this.logTotalDistance(),
+       totalTime: this.logTotalTime(),
+       rating: this.logRating()
+     });
+     this.logMessage.set(result.message);
+     this.logMessageType.set(result.success ? 'success' : 'error');
+     this.logLoading.set(false);
 
-    const logDto = {
-      dateTime: new Date(this.logDateTime()),
-      comment: this.logComment(),
-      difficulty: this.logDifficulty(),
-      totalDistance: this.logTotalDistance(),
-      totalTime: this.logTotalTime(),
-      rating: this.logRating()
-    };
+     if (result.success) {
+       setTimeout(() => this.closeLogModal(), 1000);
+     }
+   }
 
-    const result = await this.tourLogService.createTourLog(this.tour?.id || '', logDto);
-    this.logMessage.set(result.message);
-    this.logMessageType.set(result.success ? 'success' : 'error');
-    this.logLoading.set(false);
+   async onSubmitEditTourLog(): Promise<void> {
+     this.logLoading.set(true);
+     this.logMessage.set('');
 
-    if (result.success) {
-      setTimeout(() => {
-        this.closeLogModal();
-      }, 1000);
-    }
-  }
+     if (!this.logDateTime() || !this.logComment() || this.logTotalDistance() <= 0 || this.logTotalTime() <= 0) {
+       this.logMessage.set('Please fill in all required fields.');
+       this.logMessageType.set('error');
+       this.logLoading.set(false);
+       return;
+     }
 
-  async onSubmitEditTourLog(): Promise<void> {
-    this.logLoading.set(true);
-    this.logMessage.set('');
+     const logId = this.editingLogId();
+     if (!logId) {
+       this.logMessage.set('Error: Log ID not found.');
+       this.logMessageType.set('error');
+       this.logLoading.set(false);
+       return;
+     }
 
-    if (!this.logDateTime() || !this.logComment() || this.logTotalDistance() <= 0 || this.logTotalTime() <= 0) {
-      this.logMessage.set('Please fill in all required fields.');
-      this.logMessageType.set('error');
-      this.logLoading.set(false);
-      return;
-    }
+     const result = await this.tourLogService.updateTourLog(logId, {
+       dateTime: new Date(this.logDateTime()),
+       comment: this.logComment(),
+       difficulty: this.logDifficulty(),
+       totalDistance: this.logTotalDistance(),
+       totalTime: this.logTotalTime(),
+       rating: this.logRating()
+     });
+     this.logMessage.set(result.message);
+     this.logMessageType.set(result.success ? 'success' : 'error');
+     this.logLoading.set(false);
 
-    const logId = this.editingLogId();
-    if (!logId) {
-      this.logMessage.set('Error: Log ID not found.');
-      this.logMessageType.set('error');
-      this.logLoading.set(false);
-      return;
-    }
+     if (result.success) {
+       setTimeout(() => this.closeEditLogModal(), 1000);
+     }
+   }
 
-    const logDto = {
-      dateTime: new Date(this.logDateTime()),
-      comment: this.logComment(),
-      difficulty: this.logDifficulty(),
-      totalDistance: this.logTotalDistance(),
-      totalTime: this.logTotalTime(),
-      rating: this.logRating()
-    };
+   deleteTourLog(logId: string, event?: Event): void {
+     event?.stopPropagation();
+     if (confirm('Are you sure you want to delete this tour log?')) this.tourLogService.deleteTourLog(logId);
+   }
 
-    const result = await this.tourLogService.updateTourLog(logId, logDto);
-    this.logMessage.set(result.message);
-    this.logMessageType.set(result.success ? 'success' : 'error');
-    this.logLoading.set(false);
+   // Utility methods
+   backToDashboard(): void { this.router.navigate(['/dashboard']); }
 
-    if (result.success) {
-      setTimeout(() => {
-        this.closeEditLogModal();
-      }, 1000);
-    }
-  }
+   getTransportIcon(type: string): string {
+     const icons: { [key: string]: string } = { car: '🚗', bike: '🚴', foot: '🚶' };
+     return icons[type] || '🚗';
+   }
 
-  deleteTourLog(logId: string, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
-    if (confirm('Are you sure you want to delete this tour log?')) {
-      this.tourLogService.deleteTourLog(logId);
-    }
-  }
+   formatDistance(km: number): string { return `${km} km`; }
 
-  // Utility methods
-  backToDashboard(): void {
-    this.router.navigate(['/dashboard']);
-  }
+   formatTime(minutes: number): string {
+     const hours = Math.floor(minutes / 60);
+     return hours > 0 ? `${hours}h ${minutes % 60}m` : `${minutes % 60}m`;
+   }
 
-  getTransportIcon(type: string): string {
-    const icons: { [key: string]: string } = {
-      'car': '🚗',
-      'bike': '🚴',
-      'foot': '🚶'
-    };
-    return icons[type] || '🚗';
-  }
+   formatLogDate(date: Date): string {
+     const d = new Date(date);
+     return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+   }
 
-  formatDistance(km: number): string {
-    return `${km} km`;
-  }
+   getDifficultyIcon(difficulty: string): string {
+     const icons: { [key: string]: string } = { easy: '😊', medium: '😐', hard: '😤' };
+     return icons[difficulty] || '😐';
+   }
 
-  formatTime(minutes: number): string {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0) {
-      return `${hours}h ${mins}m`;
-    }
-    return `${mins}m`;
-  }
+   getRatingStars(rating: number): string { return '⭐'.repeat(rating) + '☆'.repeat(5 - rating); }
 
-  formatLogDate(date: Date): string {
-    return new Date(date).toLocaleDateString() + ' ' + new Date(date).toLocaleTimeString();
-  }
-
-  getDifficultyIcon(difficulty: string): string {
-    const icons: { [key: string]: string } = {
-      'easy': '😊',
-      'medium': '😐',
-      'hard': '😤'
-    };
-    return icons[difficulty] || '😐';
-  }
-
-  getRatingStars(rating: number): string {
-    return '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/auth']);
-  }
+   logout(): void {
+     this.authService.logout();
+     this.router.navigate(['/auth']);
+   }
 }
 

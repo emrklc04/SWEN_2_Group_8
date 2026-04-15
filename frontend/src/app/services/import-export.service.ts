@@ -15,67 +15,34 @@ export class ImportExportService {
   private readonly VERSION = '1.0';
 
   exportToJson(tours: Tour[], logs: TourLog[], filename: string = 'tourplanner-export.json'): void {
-    const exportData: ExportData = {
-      tours,
-      logs,
-      exportDate: new Date().toISOString(),
-      version: this.VERSION,
-    };
-
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    this.downloadFile(dataBlob, filename);
+    const exportData: ExportData = { tours, logs, exportDate: new Date().toISOString(), version: this.VERSION };
+    this.downloadFile(new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' }), filename);
   }
 
   exportToCsv(tours: Tour[], logs: TourLog[], filename: string = 'tourplanner-export.csv'): void {
-    let csv = 'TOURS\n';
-    csv += 'ID,Name,Description,From,To,Transport,Distance,Time,Created\n';
+    const toursCsv = ['TOURS', 'ID,Name,Description,From,To,Transport,Distance,Time,Created']
+      .concat(tours.map(t => `"${t.id}","${t.name}","${t.description}","${t.from}","${t.to}","${t.transportType}",${t.distance},${t.estimatedTime},"${new Date(t.createdAt).toISOString()}"`))
+      .join('\n');
 
-    tours.forEach((tour) => {
-      const date = new Date(tour.createdAt).toISOString();
-      csv += `"${tour.id}","${tour.name}","${tour.description}","${tour.from}","${tour.to}","${tour.transportType}",${tour.distance},${tour.estimatedTime},"${date}"\n`;
-    });
+    const logsCsv = ['', 'TOUR LOGS', 'ID,TourID,DateTime,Comment,Difficulty,Distance,Time,Rating,Created']
+      .concat(logs.map(l => `"${l.id}","${l.tourId}","${new Date(l.dateTime).toISOString()}","${l.comment}","${l.difficulty}",${l.totalDistance},${l.totalTime},${l.rating},"${new Date(l.createdAt).toISOString()}"`))
+      .join('\n');
 
-    csv += '\nTOUR LOGS\n';
-    csv += 'ID,TourID,DateTime,Comment,Difficulty,Distance,Time,Rating,Created\n';
-
-    logs.forEach((log) => {
-      const date = new Date(log.dateTime).toISOString();
-      const created = new Date(log.createdAt).toISOString();
-      csv += `"${log.id}","${log.tourId}","${date}","${log.comment}","${log.difficulty}",${log.totalDistance},${log.totalTime},${log.rating},"${created}"\n`;
-    });
-
-    const dataBlob = new Blob([csv], { type: 'text/csv' });
-    this.downloadFile(dataBlob, filename);
+    this.downloadFile(new Blob([toursCsv + logsCsv], { type: 'text/csv' }), filename);
   }
 
-  async importFromJson(
-    file: File,
-  ): Promise<{ success: boolean; data?: ExportData; message: string }> {
-    try {
-      const content = await this.readFileAsText(file);
-      const data = JSON.parse(content) as ExportData;
+  async importFromJson(file: File): Promise<{ success: boolean; data?: ExportData; message: string }> {
+     try {
+       const data = JSON.parse(await this.readFileAsText(file)) as ExportData;
+       if (!Array.isArray(data.tours) || !Array.isArray(data.logs)) return { success: false, message: 'Invalid file format.' };
 
-      if (!Array.isArray(data.tours) || !Array.isArray(data.logs)) {
-        return { success: false, message: 'Invalid file format.' };
-      }
-
-      const tours = data.tours.map((t) => ({ ...t, createdAt: new Date(t.createdAt) }));
-      const logs = data.logs.map((l) => ({
-        ...l,
-        dateTime: new Date(l.dateTime),
-        createdAt: new Date(l.createdAt),
-      }));
-
-      return {
-        success: true,
-        data: { ...data, tours, logs },
-        message: `Imported: ${tours.length} tours and ${logs.length} logs.`,
-      };
-    } catch (error) {
-      return { success: false, message: 'Import failed.' };
-    }
-  }
+       const tours = data.tours.map(t => ({ ...t, createdAt: new Date(t.createdAt) }));
+       const logs = data.logs.map(l => ({ ...l, dateTime: new Date(l.dateTime), createdAt: new Date(l.createdAt) }));
+       return { success: true, data: { ...data, tours, logs }, message: `Imported: ${tours.length} tours and ${logs.length} logs.` };
+     } catch (error) {
+       return { success: false, message: 'Import failed.' };
+     }
+   }
 
   private readFileAsText(file: File): Promise<string> {
     return new Promise((resolve, reject) => {

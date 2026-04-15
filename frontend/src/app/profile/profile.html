@@ -94,19 +94,6 @@
           </div>
         </div>
 
-        <!-- Avatar URL Field (only when editing) -->
-        <div class="info-field" *ngIf="isEditing()">
-          <label class="field-label">Avatar URL</label>
-          <div class="field-value-container editing">
-            <input
-              type="url"
-              class="field-input"
-              [(ngModel)]="avatar"
-              name="avatar"
-              placeholder="https://...">
-          </div>
-        </div>
-
         <!-- Message Display -->
         <div class="message"
              *ngIf="message()"

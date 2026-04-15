@@ -11,101 +11,79 @@ export class TourLogService {
   public tourLogs$ = this.tourLogsSubject.asObservable();
 
   getTourLogsByTourId(tourId: string): TourLog[] {
-    return this.getTourLogs().filter((log) => log.tourId === tourId);
+    return this.getTourLogs().filter(log => log.tourId === tourId);
   }
 
-  getTourLogs(): TourLog[] {
-    return this.tourLogsSubject.value;
-  }
+  getTourLogs(): TourLog[] { return this.tourLogsSubject.value; }
 
   getTourLogById(logId: string): TourLog | undefined {
-    return this.getTourLogs().find((log) => log.id === logId);
+    return this.getTourLogs().find(log => log.id === logId);
   }
 
-  async createTourLog(
-    tourId: string,
-    logDto: CreateTourLogDto,
-  ): Promise<{ success: boolean; message: string; log?: TourLog }> {
-    try {
-      if (!tourId) {
-        return { success: false, message: 'Tour ID is required.' };
-      }
-
-      // Validierung
-      if (logDto.rating < 1 || logDto.rating > 5) {
-        return { success: false, message: 'Rating must be between 1 and 5.' };
-      }
-
-      if (logDto.totalDistance <= 0 || logDto.totalTime <= 0) {
-        return { success: false, message: 'Distance and time must be greater than 0.' };
-      }
-
-      const tourLog: TourLog = {
-        id: Date.now().toString(),
-        tourId: tourId,
-        dateTime: logDto.dateTime,
-        comment: logDto.comment,
-        difficulty: logDto.difficulty,
-        totalDistance: logDto.totalDistance,
-        totalTime: logDto.totalTime,
-        rating: logDto.rating,
-        createdAt: new Date(),
-      };
-
-      const logs = this.getTourLogs();
-      logs.push(tourLog);
-      this.saveTourLogs(logs);
-      this.tourLogsSubject.next(logs);
-
-      return { success: true, message: 'Tour log created successfully!', log: tourLog };
-    } catch (error) {
-      return { success: false, message: 'Failed to create tour log.' };
-    }
+  private validateLogDto(logDto: CreateTourLogDto): { valid: boolean; message: string } {
+    if (logDto.rating < 1 || logDto.rating > 5) return { valid: false, message: 'Rating must be between 1 and 5.' };
+    if (logDto.totalDistance <= 0 || logDto.totalTime <= 0) return { valid: false, message: 'Distance and time must be greater than 0.' };
+    return { valid: true, message: '' };
   }
 
-  async updateTourLog(
-    logId: string,
-    logDto: CreateTourLogDto,
-  ): Promise<{ success: boolean; message: string; log?: TourLog }> {
-    try {
-      const logs = this.getTourLogs();
-      const logIndex = logs.findIndex((log) => log.id === logId);
+  async createTourLog(tourId: string, logDto: CreateTourLogDto): Promise<{ success: boolean; message: string; log?: TourLog }> {
+     try {
+       if (!tourId) return { success: false, message: 'Tour ID is required.' };
+       const validation = this.validateLogDto(logDto);
+       if (!validation.valid) return { success: false, message: validation.message };
 
-      if (logIndex === -1) {
-        return { success: false, message: 'Tour log not found.' };
-      }
+       const tourLog: TourLog = {
+         id: Date.now().toString(),
+         tourId,
+         dateTime: logDto.dateTime,
+         comment: logDto.comment,
+         difficulty: logDto.difficulty,
+         totalDistance: logDto.totalDistance,
+         totalTime: logDto.totalTime,
+         rating: logDto.rating,
+         createdAt: new Date(),
+       };
 
-      // Validierung
-      if (logDto.rating < 1 || logDto.rating > 5) {
-        return { success: false, message: 'Rating must be between 1 and 5.' };
-      }
+       const logs = this.getTourLogs();
+       logs.push(tourLog);
+       this.saveTourLogs(logs);
+       this.tourLogsSubject.next(logs);
+       return { success: true, message: 'Tour log created successfully!', log: tourLog };
+     } catch (error) {
+       return { success: false, message: 'Failed to create tour log.' };
+     }
+   }
 
-      if (logDto.totalDistance <= 0 || logDto.totalTime <= 0) {
-        return { success: false, message: 'Distance and time must be greater than 0.' };
-      }
+  async updateTourLog(logId: string, logDto: CreateTourLogDto): Promise<{ success: boolean; message: string; log?: TourLog }> {
+     try {
+       const logs = this.getTourLogs();
+       const logIndex = logs.findIndex(log => log.id === logId);
+       if (logIndex === -1) return { success: false, message: 'Tour log not found.' };
 
-      const updatedLog: TourLog = {
-        ...logs[logIndex],
-        dateTime: logDto.dateTime,
-        comment: logDto.comment,
-        difficulty: logDto.difficulty,
-        totalDistance: logDto.totalDistance,
-        totalTime: logDto.totalTime,
-        rating: logDto.rating,
-      };
+       const validation = this.validateLogDto(logDto);
+       if (!validation.valid) return { success: false, message: validation.message };
 
-      logs[logIndex] = updatedLog;
-      this.saveTourLogs(logs);
-      this.tourLogsSubject.next(logs);
+       const updatedLog: TourLog = {
+         ...logs[logIndex],
+         dateTime: logDto.dateTime,
+         comment: logDto.comment,
+         difficulty: logDto.difficulty,
+         totalDistance: logDto.totalDistance,
+         totalTime: logDto.totalTime,
+         rating: logDto.rating,
+       };
 
-      return { success: true, message: 'Tour log updated successfully!', log: updatedLog };
-    } catch (error) {
-      return { success: false, message: 'Failed to update tour log.' };
-    }
-  }
+       logs[logIndex] = updatedLog;
+       this.saveTourLogs(logs);
+       this.tourLogsSubject.next(logs);
+       return { success: true, message: 'Tour log updated successfully!', log: updatedLog };
+     } catch (error) {
+       return { success: false, message: 'Failed to update tour log.' };
+     }
+   }
 
   deleteTourLog(logId: string): void {
-    const logs = this.getTourLogs().filter((log) => log.id !== logId);
+    const logs = this.getTourLogs().filter(log => log.id !== logId);
     this.saveTourLogs(logs);
     this.tourLogsSubject.next(logs);
   }

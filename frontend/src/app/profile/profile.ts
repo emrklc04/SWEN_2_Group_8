@@ -41,50 +41,41 @@ export class Profile implements OnInit {
     }
   }
 
-  toggleEdit(): void {
-    this.isEditing.set(!this.isEditing());
-    this.message.set('');
-  }
+   toggleEdit(): void {
+     this.isEditing.set(!this.isEditing());
+     this.message.set('');
+   }
 
-  saveChanges(): void {
-    this.loading.set(true);
-    this.message.set('');
+   saveChanges(): void {
+     this.loading.set(true);
+     this.message.set('');
 
-    if (!this.name() || !this.email()) {
-      this.message.set('Name und Email sind erforderlich.');
-      this.messageType.set('error');
-      this.loading.set(false);
-      return;
-    }
+     if (!this.name() || !this.email()) {
+       this.message.set('Name und Email sind erforderlich.');
+       this.messageType.set('error');
+       this.loading.set(false);
+       return;
+     }
 
-    const updatedUser: User = {
-      email: this.email(),
-      name: this.name(),
-      mobile: this.mobile(),
-      location: this.location(),
-      avatar: this.avatar(),
-    };
+     const updatedUser: User = {
+       email: this.email(),
+       name: this.name(),
+       mobile: this.mobile(),
+       location: this.location(),
+       avatar: this.avatar(),
+     };
 
-    const result = this.authService.updateUser(updatedUser);
-    this.message.set(result.message);
-    this.messageType.set(result.success ? 'success' : 'error');
-    this.loading.set(false);
+     const result = this.authService.updateUser(updatedUser);
+     this.message.set(result.message);
+     this.messageType.set(result.success ? 'success' : 'error');
+     if (result.success) {
+       this.currentUser = updatedUser;
+       this.loading.set(false);
+       setTimeout(() => { this.isEditing.set(false); this.message.set(''); }, 2000);
+     }
+     this.loading.set(false);
+   }
 
-    if (result.success) {
-      this.currentUser = updatedUser;
-      setTimeout(() => {
-        this.isEditing.set(false);
-        this.message.set('');
-      }, 2000);
-    }
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/auth']);
-  }
-
-  backToDashboard(): void {
-    this.router.navigate(['/dashboard']);
-  }
+   logout(): void { this.authService.logout(); this.router.navigate(['/auth']); }
+   backToDashboard(): void { this.router.navigate(['/dashboard']); }
 }
