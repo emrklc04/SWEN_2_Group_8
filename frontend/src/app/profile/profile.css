@@ -154,23 +154,22 @@
   color: white;
 }
 
-/* Profile Info */
+/* Profile Info (GRID LAYOUT) */
 .profile-info {
   padding: 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 Spalten */
+  gap: 20px;
 }
 
 .info-field {
-  margin-bottom: 25px;
-}
-
-.info-field:last-of-type {
   margin-bottom: 0;
 }
 
 .field-label {
   display: block;
-  font-size: 13px;
-  font-weight: bold;
+  font-size: 15px; /* größer */
+  font-weight: 600;
   color: #333;
   margin-bottom: 8px;
   text-transform: capitalize;
@@ -190,10 +189,10 @@
 
 .field-input {
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 14px;
   font-family: inherit;
   background: #f9f9f9;
   transition: all 0.2s ease;
@@ -206,12 +205,12 @@
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
-/* Message Display */
+/* Message */
 .message {
+  grid-column: span 2;
   padding: 12px;
   border-radius: 4px;
   font-size: 13px;
-  margin-bottom: 20px;
   margin-top: 10px;
 }
 
@@ -227,11 +226,12 @@
   border: 1px solid #f5c6cb;
 }
 
-/* Profile Actions */
+/* Actions */
 .profile-actions {
+  grid-column: span 2;
   display: flex;
   gap: 10px;
-  margin-top: 25px;
+  margin-top: 10px;
   padding-top: 20px;
   border-top: 1px solid #f0f0f0;
 }
@@ -295,6 +295,50 @@
   }
 
   .profile-info {
-    padding: 20px;
+    grid-template-columns: 1fr; /* wieder untereinander */
   }
+
+  .message,
+  .profile-actions {
+    grid-column: span 1;
+  }
+}
+
+.stats-section {
+  grid-column: span 2;
+  margin-top: 30px;
+}
+
+.stats-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.stats-grid {
+  display: flex;
+  gap: 15px;
+}
+
+.stat-card {
+  flex: 1;
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #eee;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
 }

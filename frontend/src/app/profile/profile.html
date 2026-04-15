@@ -15,6 +15,7 @@
 
   <main class="main-content">
     <div class="profile-card">
+
       <!-- Profile Header -->
       <div class="profile-header">
         <div class="profile-avatar">
@@ -34,67 +35,48 @@
 
       <!-- Profile Info Section -->
       <div class="profile-info">
-        <!-- Name Field -->
+
+        <!-- Name -->
         <div class="info-field">
           <label class="field-label">Name</label>
-          <div class="field-value-container" [class.editing]="isEditing()">
-            <input
-              *ngIf="isEditing()"
-              type="text"
-              class="field-input"
-              [(ngModel)]="name"
-              name="name"
-              placeholder="Your name">
+          <div class="field-value-container">
+            <input *ngIf="isEditing()" type="text" class="field-input"
+                   [(ngModel)]="name" name="name" placeholder="Your name">
             <span *ngIf="!isEditing()" class="field-value">{{ name() || 'Not set' }}</span>
           </div>
         </div>
 
-        <!-- Email Field -->
+        <!-- Email -->
         <div class="info-field">
           <label class="field-label">Email account</label>
-          <div class="field-value-container" [class.editing]="isEditing()">
-            <input
-              *ngIf="isEditing()"
-              type="email"
-              class="field-input"
-              [(ngModel)]="email"
-              name="email"
-              placeholder="your@email.com">
+          <div class="field-value-container">
+            <input *ngIf="isEditing()" type="email" class="field-input"
+                   [(ngModel)]="email" name="email" placeholder="your@email.com">
             <span *ngIf="!isEditing()" class="field-value">{{ email() }}</span>
           </div>
         </div>
 
-        <!-- Mobile Field -->
+        <!-- Mobile -->
         <div class="info-field">
           <label class="field-label">Mobile number</label>
-          <div class="field-value-container" [class.editing]="isEditing()">
-            <input
-              *ngIf="isEditing()"
-              type="tel"
-              class="field-input"
-              [(ngModel)]="mobile"
-              name="mobile"
-              placeholder="Add number">
+          <div class="field-value-container">
+            <input *ngIf="isEditing()" type="tel" class="field-input"
+                   [(ngModel)]="mobile" name="mobile" placeholder="Add number">
             <span *ngIf="!isEditing()" class="field-value">{{ mobile() || 'Add number' }}</span>
           </div>
         </div>
 
-        <!-- Location Field -->
+        <!-- Location -->
         <div class="info-field">
           <label class="field-label">Location</label>
-          <div class="field-value-container" [class.editing]="isEditing()">
-            <input
-              *ngIf="isEditing()"
-              type="text"
-              class="field-input"
-              [(ngModel)]="location"
-              name="location"
-              placeholder="Your location">
+          <div class="field-value-container">
+            <input *ngIf="isEditing()" type="text" class="field-input"
+                   [(ngModel)]="location" name="location" placeholder="Your location">
             <span *ngIf="!isEditing()" class="field-value">{{ location() || 'Not set' }}</span>
           </div>
         </div>
 
-        <!-- Message Display -->
+        <!-- Message -->
         <div class="message"
              *ngIf="message()"
              [class.success]="messageType() === 'success'"
@@ -102,21 +84,34 @@
           {{ message() }}
         </div>
 
-        <!-- Action Buttons -->
+        <!-- Actions -->
         <div class="profile-actions" *ngIf="isEditing()">
-          <button
-            class="cancel-button"
-            (click)="toggleEdit()"
-            [disabled]="loading()">
-            Cancel
-          </button>
-          <button
-            class="save-button"
-            (click)="saveChanges()"
-            [disabled]="loading()">
+          <button class="cancel-button" (click)="toggleEdit()" [disabled]="loading()">Cancel</button>
+          <button class="save-button" (click)="saveChanges()" [disabled]="loading()">
             {{ loading() ? 'Saving...' : 'Save changes' }}
           </button>
         </div>
+
+        <!-- ===================== -->
+        <!-- STATISTIKEN SECTION -->
+        <!-- ===================== -->
+
+        <div class="stats-section">
+          <h2 class="stats-title">Statistiken</h2>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <p class="stat-label">Tours</p>
+              <h3 class="stat-value">0</h3> <!-- Platzhalter -->
+            </div>
+
+            <div class="stat-card">
+              <p class="stat-label">Tour Logs</p>
+              <h3 class="stat-value">0</h3> <!-- Platzhalter -->
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
