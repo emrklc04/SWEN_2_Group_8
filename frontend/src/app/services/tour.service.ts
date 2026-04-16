@@ -10,6 +10,7 @@ import { SearchService } from './search.service';
 })
 export class TourService {
   private readonly TOURS_KEY = 'tp_tours';
+  // BehaviorSubject speichert aktuelle Tours und informiert UI bei Änderungen
   private toursSubject = new BehaviorSubject<Tour[]>(this.loadTours());
   public tours$ = this.toursSubject.asObservable();
 
@@ -21,6 +22,7 @@ export class TourService {
 
   getTours(): Tour[] {
     const logs = this.tourLogService.getTourLogs();
+    // erweitert jede Tour um berechnete Werte (Popularity & ChildFriendliness)
     return this.toursSubject.value.map(tour => ({
       ...tour,
       popularity: this.searchService.calculatePopularity(tour.id, logs),
@@ -30,7 +32,7 @@ export class TourService {
 
    getTourById(id: string): Observable<Tour> {
      const tour = this.getTours().find(t => t.id === id);
-     return of(tour as Tour);
+     return of(tour as Tour);// of(...) erstellt ein Observable aus einem Wert
    }
 
   async createTour(tourDto: CreateTourDto): Promise<{ success: boolean; message: string; tour?: Tour }> {
@@ -50,8 +52,8 @@ export class TourService {
        };
        const tours = this.getTours();
        tours.push(tour);
-       this.saveTours(tours);
-       this.toursSubject.next(tours);
+       this.saveTours(tours);// speichert Daten im localStorage
+       this.toursSubject.next(tours);// informiert alle Observer über Änderung
        return { success: true, message: 'Tour created successfully!', tour };
      } catch (error) {
        return { success: false, message: 'Failed to create tour.' };
@@ -71,6 +73,7 @@ export class TourService {
        if (tourIndex === -1) return { success: false, message: 'Tour not found.' };
 
        const oldTour = tours[tourIndex];
+       // prüft, ob sich Route geändert hat -> nur dann neue API-Anfrage
        const routeChanged = oldTour.from !== tourDto.from || oldTour.to !== tourDto.to || oldTour.transportType !== tourDto.transportType;
        let routeResult = { distance: oldTour.distance, duration: oldTour.estimatedTime, coordinates: oldTour.routeInformation.coordinates };
 
@@ -103,6 +106,7 @@ export class TourService {
     const toursJson = localStorage.getItem(this.TOURS_KEY);
     if (!toursJson) return [];
     const tours = JSON.parse(toursJson);
+    // konvertiert gespeicherte Datums-Strings wieder zu Date-Objekten
     return tours.map((t: any) => ({ ...t, createdAt: new Date(t.createdAt) }));
   }
 

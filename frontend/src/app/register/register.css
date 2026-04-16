@@ -1,0 +1,76 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+h1, p {
+  text-align: center;
+  margin: 0 0 5px 0;
+}
+
+h1 { color: #333; font-size: 24px; }
+p { color: #666; font-size: 14px; }
+
+form div { margin-bottom: 15px; }
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+input:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.msg {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 3px;
+  font-size: 13px;
+  background-color: #ffcccc;
+  color: #cc0000;
+  border: 1px solid #ff9999;
+}
+
+.msg.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover:not(:disabled) { background-color: #555; }
+button:disabled { background-color: #999; cursor: not-allowed; }

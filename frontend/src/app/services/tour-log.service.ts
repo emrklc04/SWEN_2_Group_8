@@ -7,18 +7,12 @@ import { TourLog, CreateTourLogDto } from '../models/tour.model';
 })
 export class TourLogService {
   private readonly TOUR_LOGS_KEY = 'tp_tour_logs';
+  // BehaviorSubject speichert aktuelle Logs und benachrichtigt bei Änderungen
   private tourLogsSubject = new BehaviorSubject<TourLog[]>(this.loadTourLogs());
   public tourLogs$ = this.tourLogsSubject.asObservable();
 
-  getTourLogsByTourId(tourId: string): TourLog[] {
-    return this.getTourLogs().filter(log => log.tourId === tourId);
-  }
-
+  // gibt aktuellen Wert der Logs zurück
   getTourLogs(): TourLog[] { return this.tourLogsSubject.value; }
-
-  getTourLogById(logId: string): TourLog | undefined {
-    return this.getTourLogs().find(log => log.id === logId);
-  }
 
   private validateLogDto(logDto: CreateTourLogDto): { valid: boolean; message: string } {
     if (logDto.rating < 1 || logDto.rating > 5) return { valid: false, message: 'Rating must be between 1 and 5.' };
@@ -92,6 +86,7 @@ export class TourLogService {
     const logsJson = localStorage.getItem(this.TOUR_LOGS_KEY);
     if (!logsJson) return [];
     const logs = JSON.parse(logsJson);
+    // konvertiert gespeicherte Strings wieder zu Date-Objekten
     return logs.map((log: any) => ({
       ...log,
       dateTime: new Date(log.dateTime),

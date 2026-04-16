@@ -18,7 +18,6 @@ export class Profile implements OnInit {
   message = signal('');
   messageType = signal<'success' | 'error'>('success');
 
-  // Form fields
   name = signal('');
   email = signal('');
   mobile = signal('');
@@ -30,9 +29,11 @@ export class Profile implements OnInit {
     private router: Router,
   ) {}
 
+  // Lifecycle-Methode → wird beim Laden der Komponente ausgeführt
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
     if (this.currentUser) {
+      // Werte aus dem aktuellen Benutzer in die Signals übernehmen
       this.name.set(this.currentUser.name || '');
       this.email.set(this.currentUser.email || '');
       this.mobile.set(this.currentUser.mobile || '');

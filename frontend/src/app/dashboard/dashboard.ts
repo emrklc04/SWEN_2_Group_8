@@ -24,11 +24,11 @@ export class Dashboard implements OnInit {
   showEditModal = signal(false);
   editingTourId = signal<string | null>(null);
 
-  // Search
+  // Suche
   searchQuery = signal('');
   filterMode = signal<'all' | 'popularity' | 'childFriendly'>('all');
 
-  // Form fields
+  // Formularfelder
   tourName = signal('');
   tourDescription = signal('');
   tourFrom = signal('');
@@ -48,8 +48,10 @@ export class Dashboard implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Lifecycle-Hook: wird beim Start der Komponente einmal aufgerufen
     this.currentUser.set(this.authService.getCurrentUser());
 
+    // subscribe->hört auf Änderungen des Observables tours$
     this.tourService.tours$.subscribe((tours) => {
       this.tours.set(tours);
       this.applyFilters();
@@ -74,9 +76,9 @@ export class Dashboard implements OnInit {
 
    logout(): void { this.authService.logout(); this.router.navigate(['/auth']); }
    goToProfile(): void { this.router.navigate(['/profile']); }
-   viewTour(id: string): void { this.router.navigate(['/tour', id]); }
+   viewTour(id: string): void { this.router.navigate(['/tour', id]); }// ['/tour', id] = Route mit Parameter, z. B. /tour/123
 
-   openCreateModal(): void { this.showCreateModal.set(true); this.resetForm(); }
+  openCreateModal(): void { this.showCreateModal.set(true); this.resetForm(); }
    closeCreateModal(): void { this.showCreateModal.set(false); this.resetForm(); }
 
    resetForm(): void {
@@ -90,7 +92,7 @@ export class Dashboard implements OnInit {
    }
 
    editTour(id: string, event?: Event): void {
-     event?.stopPropagation();
+     event?.stopPropagation();// stopPropagation() wird nur ausgeführt, wenn event wirklich existiert
      const tour = this.tours().find(t => t.id === id);
      if (tour) {
        this.editingTourId.set(id);
@@ -107,9 +109,10 @@ export class Dashboard implements OnInit {
 
     deleteTour(id: string, event?: Event): void {
       event?.stopPropagation();
-      if (confirm('Are you sure you want to delete this tour?')) this.tourService.deleteTour(id);
+      if (confirm('Are you sure you want to delete this tour?')) this.tourService.deleteTour(id);// confirm zeigt ein Browser-Bestätigungsfenster
     }
 
+  // Promise<void> = gibt später kein Ergebnis zurück, nur Abschluss
    async onSubmitTour(): Promise<void> {
      this.loading.set(true);
      this.message.set('');
@@ -167,10 +170,10 @@ export class Dashboard implements OnInit {
      this.loading.set(false);
    }
 
-    getTransportIcon(type: string): string {
-      const icons: { [key: string]: string } = { car: 'Car', bike: 'Bike', foot: 'Walk' };
-      return icons[type] || 'Car';
-    }
+   getTransportIcon(type: string): string {
+     const icons: { [key: string]: string } = { car: 'Car', bike: 'Bike', foot: 'Walk' };
+     return icons[type] || 'Car';//falls type nicht gefunden wird, wird Auto-Icon zurückgegeben
+   }
 
    formatDistance(km: number): string { return `${km} km`; }
 
@@ -201,17 +204,15 @@ export class Dashboard implements OnInit {
   }
 
   onFileSelected(event: any): void {
-    const file: File = event.target.files[0];
+    const file: File = event.target.files[0]; // greift auf die erste ausgewählte Datei zu
     if (!file) return;
 
     this.importExportService.importFromJson(file).then((result) => {
       if (result.success && result.data) {
-        // Merge imported data
         const currentTours = this.tours();
 
         const mergedTours = [...currentTours, ...result.data.tours];
 
-        // Save merged data
         this.tours().forEach((t) => this.tourService.deleteTour(t.id));
         mergedTours.forEach((t) => {
           if (!this.tours().find((x) => x.id === t.id)) {

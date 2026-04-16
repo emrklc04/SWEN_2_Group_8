@@ -9,7 +9,6 @@
   <!-- Main Content -->
   <main class="flex-grow-1 p-4">
     <div class="container-fluid">
-      <!-- Loading State -->
       <div *ngIf="loading()" class="alert alert-info text-center">Loading...</div>
 
       <!-- Tour Detail Container -->
@@ -42,7 +41,7 @@
                     <p class="fw-bold mb-0">{{ formatTime(tour.estimatedTime) }}</p>
                   </div>
                 </div>
-                <span class="badge bg-dark">{{ getTransportIcon(tour.transportType) }} {{ tour.transportType | uppercase }}</span>
+                <span class="badge bg-dark"> {{ tour.transportType | uppercase }}</span>
               </div>
             </div>
           </div>
@@ -88,7 +87,7 @@
         </div>
       </div>
 
-      <!-- Error State -->
+      <!-- Fehlermeldung -->
       <div *ngIf="!loading() && !tour" class="alert alert-danger">
         <p>Tour not found</p>
         <button class="btn btn-secondary btn-sm" (click)="backToDashboard()">Back to Dashboard</button>
@@ -96,56 +95,56 @@
     </div>
   </main>
 
-   <!-- Create/Edit Tour Log Modals -->
-   <ng-container *ngFor="let isEdit of [false, true]">
-     <div class="modal fade" *ngIf="(isEdit ? showEditLogModal() : showLogModal())" [attr.data-edit]="isEdit" (click)="isEdit ? closeEditLogModal() : closeLogModal()" [class.show]="true" style="display: block; background: rgba(0, 0, 0, 0.3);">
-       <div class="modal-dialog" (click)="$event.stopPropagation()">
-         <div class="modal-content">
-           <div class="modal-header">
-             <h5 class="modal-title">{{ isEdit ? 'Edit' : 'Create' }} Tour Log</h5>
-             <button type="button" class="btn-close" (click)="isEdit ? closeEditLogModal() : closeLogModal()"></button>
-           </div>
-           <form (ngSubmit)="isEdit ? onSubmitEditTourLog() : onSubmitTourLog()" class="modal-body">
-             <div class="mb-3">
-               <label class="form-label fw-bold">Date & Time *</label>
-               <input type="datetime-local" class="form-control" [(ngModel)]="logDateTime" name="logDateTime" required [disabled]="logLoading()" />
-             </div>
-             <div class="mb-3">
-               <label class="form-label fw-bold">Comment *</label>
-               <textarea class="form-control" [(ngModel)]="logComment" name="logComment" placeholder="Describe your experience..." rows="3" required [disabled]="logLoading()"></textarea>
-             </div>
-             <div class="row">
-               <div class="col-6 mb-3">
-                 <label class="form-label fw-bold">Difficulty *</label>
-                 <select class="form-select" [(ngModel)]="logDifficulty" name="logDifficulty" [disabled]="logLoading()">
-                   <option value="easy">Easy</option>
-                   <option value="medium">Medium</option>
-                   <option value="hard">Hard</option>
-                 </select>
-               </div>
-               <div class="col-6 mb-3">
-                 <label class="form-label fw-bold">Rating (1-5) *</label>
-                 <input type="number" class="form-control" [(ngModel)]="logRating" name="logRating" min="1" max="5" required [disabled]="logLoading()" />
-               </div>
-             </div>
-             <div class="row">
-               <div class="col-6 mb-3">
-                 <label class="form-label fw-bold">Total Distance (km) *</label>
-                 <input type="number" class="form-control" [(ngModel)]="logTotalDistance" name="logTotalDistance" step="0.1" required [disabled]="logLoading()" />
-               </div>
-               <div class="col-6 mb-3">
-                 <label class="form-label fw-bold">Total Time (minutes) *</label>
-                 <input type="number" class="form-control" [(ngModel)]="logTotalTime" name="logTotalTime" required [disabled]="logLoading()" />
-               </div>
-             </div>
-             <div class="alert" *ngIf="logMessage()" [class.alert-success]="logMessageType()==='success'" [class.alert-danger]="logMessageType()==='error'">{{ logMessage() }}</div>
-             <div class="d-flex gap-2">
-               <button type="button" class="btn btn-secondary flex-grow-1" (click)="isEdit ? closeEditLogModal() : closeLogModal()" [disabled]="logLoading()">Cancel</button>
-               <button type="submit" class="btn btn-dark flex-grow-1" [disabled]="logLoading()">{{ logLoading() ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Update Log' : 'Create Log') }}</button>
-             </div>
-           </form>
-         </div>
-       </div>
-     </div>
-   </ng-container>
+  <!-- Create/Edit Tour Log Modals -->
+  <ng-container *ngFor="let isEdit of [false, true]">
+    <div class="modal fade" *ngIf="(isEdit ? showEditLogModal() : showLogModal())" [attr.data-edit]="isEdit" (click)="isEdit ? closeEditLogModal() : closeLogModal()" [class.show]="true" style="display: block; background: rgba(0, 0, 0, 0.3);">
+      <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ isEdit ? 'Edit' : 'Create' }} Tour Log</h5>
+            <button type="button" class="btn-close" (click)="isEdit ? closeEditLogModal() : closeLogModal()"></button>
+          </div>
+          <form (ngSubmit)="isEdit ? onSubmitEditTourLog() : onSubmitTourLog()" class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Date & Time *</label>
+              <input type="datetime-local" class="form-control" [(ngModel)]="logDateTime" name="logDateTime" required [disabled]="logLoading()" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Comment *</label>
+              <textarea class="form-control" [(ngModel)]="logComment" name="logComment" placeholder="Describe your experience..." rows="3" required [disabled]="logLoading()"></textarea>
+            </div>
+            <div class="row">
+              <div class="col-6 mb-3">
+                <label class="form-label fw-bold">Difficulty *</label>
+                <select class="form-select" [(ngModel)]="logDifficulty" name="logDifficulty" [disabled]="logLoading()">
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+              <div class="col-6 mb-3">
+                <label class="form-label fw-bold">Rating (1-5) *</label>
+                <input type="number" class="form-control" [(ngModel)]="logRating" name="logRating" min="1" max="5" required [disabled]="logLoading()" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-6 mb-3">
+                <label class="form-label fw-bold">Total Distance (km) *</label>
+                <input type="number" class="form-control" [(ngModel)]="logTotalDistance" name="logTotalDistance" step="0.1" required [disabled]="logLoading()" />
+              </div>
+              <div class="col-6 mb-3">
+                <label class="form-label fw-bold">Total Time (minutes) *</label>
+                <input type="number" class="form-control" [(ngModel)]="logTotalTime" name="logTotalTime" required [disabled]="logLoading()" />
+              </div>
+            </div>
+            <div class="alert" *ngIf="logMessage()" [class.alert-success]="logMessageType()==='success'" [class.alert-danger]="logMessageType()==='error'">{{ logMessage() }}</div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-secondary flex-grow-1" (click)="isEdit ? closeEditLogModal() : closeLogModal()" [disabled]="logLoading()">Cancel</button>
+              <button type="submit" class="btn btn-dark flex-grow-1" [disabled]="logLoading()">{{ logLoading() ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Update Log' : 'Create Log') }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </ng-container>
 </div>
