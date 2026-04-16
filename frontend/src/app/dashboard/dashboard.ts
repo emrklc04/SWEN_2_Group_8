@@ -171,8 +171,8 @@ export class Dashboard implements OnInit {
    }
 
    getTransportIcon(type: string): string {
-     const icons: { [key: string]: string } = { car: '🚗', bike: '🚴', foot: '🚶' };
-     return icons[type] || '🚗';//falls type nicht gefunden wird, wird Auto-Icon zurückgegeben
+     const icons: { [key: string]: string } = { car: 'Car', bike: 'Bike', foot: 'Walk' };
+     return icons[type] || 'Car';//falls type nicht gefunden wird, wird Auto-Icon zurückgegeben
    }
 
    formatDistance(km: number): string { return `${km} km`; }

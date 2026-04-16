@@ -271,8 +271,8 @@ export class TourDetail implements OnInit {
    backToDashboard(): void { this.router.navigate(['/dashboard']); }
 
    getTransportIcon(type: string): string {
-     const icons: { [key: string]: string } = { car: '🚗', bike: '🚴', foot: '🚶' };
-     return icons[type] || '🚗';
+     const icons: { [key: string]: string } = { car: 'Car', bike: 'Bike', foot: 'Walk' };
+     return icons[type] || 'Car';
    }
 
    formatDistance(km: number): string { return `${km} km`; }
@@ -287,12 +287,9 @@ export class TourDetail implements OnInit {
      return d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
    }
 
-   getDifficultyIcon(difficulty: string): string {
-     const icons: { [key: string]: string } = { easy: '😊', medium: '😐', hard: '😤' };
-     return icons[difficulty] || '😐';
-   }
+   getDifficultyIcon(difficulty: string): string { return difficulty}
 
-   getRatingStars(rating: number): string { return '⭐'.repeat(rating) + '☆'.repeat(5 - rating); }
+  getRatingStars(rating: number): string { return '★'.repeat(rating) + '☆'.repeat(5 - rating); }
 
    logout(): void {
      this.authService.logout();
