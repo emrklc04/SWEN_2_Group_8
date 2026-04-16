@@ -1,14 +1,7 @@
 <div class="d-flex flex-column min-vh-100">
-  <!-- Header -->
   <header class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
     <div class="container-fluid px-3">
-      <div class="navbar-brand d-flex align-items-center gap-2">
-        <div class="bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 4px;">📍</div>
-        <div>
-          <h1 class="mb-0" style="font-size: 16px; font-weight: bold;">Tour Planner</h1>
-          <p class="mb-0 text-muted" style="font-size: 12px;" *ngIf="currentUser">{{ currentUser()?.email }}</p>
-        </div>
-      </div>
+      <h1 class="navbar-brand mb-0" style="font-size: 16px; font-weight: bold;">Tour Planner</h1>
       <button class="btn btn-sm btn-outline-secondary" (click)="logout()">Logout</button>
     </div>
   </header>
@@ -21,93 +14,68 @@
 
       <!-- Tour Detail Container -->
       <div *ngIf="!loading() && tour">
-        <!-- Back Button -->
-        <button class="btn btn-link btn-sm text-decoration-none mb-3" (click)="backToDashboard()">
-          ← Back to Tours
-        </button>
+        <button class="btn btn-link btn-sm mb-3" (click)="backToDashboard()">← Back</button>
 
-        <!-- Detail Grid: Info Card + Map -->
-        <div class="row g-4 mb-5">
-          <!-- Left Section: Tour Info -->
+        <div class="row g-3">
           <div class="col-12 col-lg-6">
-            <div class="card shadow-sm h-100">
+            <div class="card">
               <div class="card-body">
                 <h2 class="card-title">{{ tour.name }}</h2>
-                <p class="text-muted" *ngIf="tour.description">{{ tour.description }}</p>
-
-                <!-- From/To Info -->
-                <div class="row my-3">
+                <p class="text-muted small" *ngIf="tour.description">{{ tour.description }}</p>
+                <div class="row my-2">
                   <div class="col-6">
-                    <p class="text-muted mb-1" style="font-size: 12px;">From</p>
-                    <p class="fw-bold">{{ tour.from }}</p>
+                    <small class="text-muted">From</small>
+                    <p class="fw-bold mb-0">{{ tour.from }}</p>
                   </div>
                   <div class="col-6">
-                    <p class="text-muted mb-1" style="font-size: 12px;">To</p>
-                    <p class="fw-bold">{{ tour.to }}</p>
+                    <small class="text-muted">To</small>
+                    <p class="fw-bold mb-0">{{ tour.to }}</p>
                   </div>
                 </div>
-
-                <!-- Metrics -->
-                <div class="row g-3 my-3">
+                <div class="row g-2 my-2">
                   <div class="col-6">
-                    <div class="d-flex align-items-center gap-2">
-                      <span style="font-size: 20px;">📍</span>
-                      <div>
-                        <p class="text-muted mb-1" style="font-size: 12px;">Distance</p>
-                        <p class="fw-bold mb-0">{{ formatDistance(tour.distance) }}</p>
-                      </div>
-                    </div>
+                    <small class="text-muted d-block">Distance</small>
+                    <p class="fw-bold mb-0">{{ formatDistance(tour.distance) }}</p>
                   </div>
                   <div class="col-6">
-                    <div class="d-flex align-items-center gap-2">
-                      <span style="font-size: 20px;">⏱</span>
-                      <div>
-                        <p class="text-muted mb-1" style="font-size: 12px;">Estimated Time</p>
-                        <p class="fw-bold mb-0">{{ formatTime(tour.estimatedTime) }}</p>
-                      </div>
-                    </div>
+                    <small class="text-muted d-block">Time</small>
+                    <p class="fw-bold mb-0">{{ formatTime(tour.estimatedTime) }}</p>
                   </div>
                 </div>
-
-                <!-- Transport Type -->
                 <span class="badge bg-dark">{{ getTransportIcon(tour.transportType) }} {{ tour.transportType | uppercase }}</span>
               </div>
             </div>
           </div>
 
-          <!-- Right Section: Map -->
           <div class="col-12 col-lg-6">
-            <div class="card shadow-sm h-100">
-              <div class="card-body p-0" style="overflow: hidden;">
+            <div class="card">
+              <div class="card-body p-0">
                 <h5 class="card-title p-3 mb-0">Route Map</h5>
-                <div #mapContainer id="map" style="height: 400px; width: 100%;"></div>
+                <div #mapContainer id="map" style="height: 350px;"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Tour Logs Section -->
-        <div class="my-5">
+        <div class="my-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h3 class="mb-0">Tour Logs</h3>
-            <button class="btn btn-dark btn-sm" (click)="openLogModal()">+ Add Log</button>
+            <button class="btn btn-dark btn-sm" (click)="openLogModal()">Add Log</button>
           </div>
 
-          <div *ngIf="tourLogs().length > 0; else noLogs" class="row g-3">
-            <div class="col-12" *ngFor="let log of tourLogs()">
-              <div class="card">
-                <div class="card-body">
-                  <div class="row">
-                    <div class="col">
-                      <p class="text-muted mb-1">📅 {{ formatLogDate(log.dateTime) }}</p>
-                      <p class="mb-1">{{ getDifficultyIcon(log.difficulty) }} {{ log.difficulty | uppercase }} • {{ getRatingStars(log.rating) }}</p>
-                      <p class="card-text">💬 {{ log.comment }}</p>
-                      <p class="text-muted mb-0"><small>📍 {{ log.totalDistance }} km • ⏱ {{ formatTime(log.totalTime) }}</small></p>
-                    </div>
-                    <div class="col-auto">
-                      <button class="btn btn-link btn-sm text-primary p-0 me-2" (click)="openEditLogModal(log.id)" title="Edit">✎</button>
-                      <button class="btn btn-link btn-sm text-danger p-0" (click)="deleteTourLog(log.id, $event)" title="Delete">✕</button>
-                    </div>
+          <div *ngIf="tourLogs().length > 0; else noLogs" class="space-y-2">
+            <div *ngFor="let log of tourLogs()" class="card mb-2">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <p class="text-muted small mb-1">{{ formatLogDate(log.dateTime) }}</p>
+                    <p class="small mb-1">{{ log.difficulty | uppercase }} • {{ getRatingStars(log.rating) }}</p>
+                    <p class="card-text small">{{ log.comment }}</p>
+                    <p class="text-muted small mb-0">{{ log.totalDistance }} km • {{ formatTime(log.totalTime) }}</p>
+                  </div>
+                  <div class="col-auto">
+                    <button class="btn btn-link btn-sm text-primary p-0 me-2" (click)="openEditLogModal(log.id)">Edit</button>
+                    <button class="btn btn-link btn-sm text-danger p-0" (click)="deleteTourLog(log.id, $event)">Del</button>
                   </div>
                 </div>
               </div>

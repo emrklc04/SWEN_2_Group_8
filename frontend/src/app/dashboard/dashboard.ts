@@ -167,10 +167,10 @@ export class Dashboard implements OnInit {
      this.loading.set(false);
    }
 
-   getTransportIcon(type: string): string {
-     const icons: { [key: string]: string } = { car: '🚗', bike: '🚴', foot: '🚶' };
-     return icons[type] || '🚗';
-   }
+    getTransportIcon(type: string): string {
+      const icons: { [key: string]: string } = { car: 'Car', bike: 'Bike', foot: 'Walk' };
+      return icons[type] || 'Car';
+    }
 
    formatDistance(km: number): string { return `${km} km`; }
 
