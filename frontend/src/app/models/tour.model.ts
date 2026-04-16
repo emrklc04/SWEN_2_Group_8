@@ -36,7 +36,7 @@ export interface CreateTourLogDto {
 }
 
 export interface RouteInformation {
-  coordinates: [number, number][]; // [longitude, latitude]
+  coordinates: [number, number][]; //Koordinatenliste [Längengrad, Breitengrad]
   bbox: number[]; // bounding box [minLon, minLat, maxLon, maxLat]
 }
 

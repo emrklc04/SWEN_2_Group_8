@@ -12,7 +12,6 @@ export interface SearchResult {
 export class SearchService {
 
    //Durchführt eine Full-Text-Suche in Tours und Tour-Logs
-
    searchTours(query: string, tours: Tour[], logs: TourLog[]): SearchResult {
      if (!query?.trim()) return { tours: [], totalResults: 0 };
 

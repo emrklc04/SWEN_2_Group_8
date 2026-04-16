@@ -16,10 +16,9 @@
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Hauptinhalt -->
   <main class="flex-grow-1 p-4">
     <div class="container-fluid">
-      <!-- Page Header -->
       <div class="row mb-4">
         <div class="col">
           <h2 class="display-6 mb-0">My Tours</h2>
@@ -29,8 +28,9 @@
         </div>
       </div>
 
-      <!-- Search and Filter Section -->
+      <!-- Such und Filterbereich -->
       <div class="row gap-3 mb-4">
+        <!-- [(ngModel)] = Two-Way Binding → verbindet Input mit Variable -->
         <div class="col-12 col-md-auto flex-grow-1">
           <input type="text" class="form-control form-control-sm" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search tours by name, location, or logs...">
         </div>
@@ -44,6 +44,7 @@
         <div class="col-12 col-md-auto d-flex gap-1">
           <button class="btn btn-sm btn-success" (click)="exportToJson()" title="Export as JSON">⬇ JSON</button>
           <button class="btn btn-sm btn-success" (click)="exportToCsv()" title="Export as CSV">⬇ CSV</button>
+          <!-- Datei-Upload -->
           <label class="btn btn-sm btn-success mb-0">
             ⬆ Import
             <input type="file" hidden accept=".json" (change)="onFileSelected($event)">
@@ -81,13 +82,14 @@
         </div>
       </div>
 
+      <!-- Template für leeren Zustand -->
       <ng-template #emptyState>
         <div class="alert alert-info text-center py-5">{{ searchQuery() ? 'No tours match your search.' : 'No tours yet. Create your first tour!' }}</div>
       </ng-template>
     </div>
   </main>
 
-   <!-- Create/Edit Tour Modal -->
+   <!-- Create/Edit Tour Model -->
    <ng-container *ngFor="let isEdit of [false, true]">
      <div class="modal fade" *ngIf="(isEdit ? showEditModal() : showCreateModal())" [attr.data-edit]="isEdit" (click)="isEdit ? closeEditModal() : closeCreateModal()" [class.show]="true" style="display: block; background: rgba(0, 0, 0, 0.3);">
        <div class="modal-dialog" (click)="$event.stopPropagation()">

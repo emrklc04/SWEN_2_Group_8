@@ -1,11 +1,7 @@
 <div class="profile-container">
   <header class="header">
     <div class="header-left">
-      <div class="logo">📍</div>
-      <div class="header-info">
-        <h1 class="header-title">Tour Planner</h1>
-        <p class="header-subtitle">Profile</p>
-      </div>
+      <h1 class="header-title">Tour Planner</h1>
     </div>
     <div class="header-right">
       <button class="back-button" (click)="backToDashboard()" title="Back to Dashboard">← Dashboard</button>
@@ -16,14 +12,13 @@
   <main class="main-content">
     <div class="profile-card">
 
-      <!-- Profile Header -->
+      <!-- Profil Header -->
       <div class="profile-header">
         <div class="profile-avatar">
           <img [src]="avatar()" alt="Profile Avatar" class="avatar-image">
         </div>
         <div class="profile-name-section">
           <h1 class="profile-name">{{ name() || 'Your name' }}</h1>
-          <p class="profile-email">{{ email() }}</p>
         </div>
         <button
           class="edit-button"
@@ -33,10 +28,9 @@
         </button>
       </div>
 
-      <!-- Profile Info Section -->
+      <!-- Profilinformationen -->
       <div class="profile-info">
 
-        <!-- Name -->
         <div class="info-field">
           <label class="field-label">Name</label>
           <div class="field-value-container">
@@ -46,7 +40,6 @@
           </div>
         </div>
 
-        <!-- Email -->
         <div class="info-field">
           <label class="field-label">Email account</label>
           <div class="field-value-container">
@@ -56,7 +49,6 @@
           </div>
         </div>
 
-        <!-- Mobile -->
         <div class="info-field">
           <label class="field-label">Mobile number</label>
           <div class="field-value-container">
@@ -66,7 +58,6 @@
           </div>
         </div>
 
-        <!-- Location -->
         <div class="info-field">
           <label class="field-label">Location</label>
           <div class="field-value-container">
@@ -76,7 +67,6 @@
           </div>
         </div>
 
-        <!-- Message -->
         <div class="message"
              *ngIf="message()"
              [class.success]="messageType() === 'success'"
@@ -84,7 +74,6 @@
           {{ message() }}
         </div>
 
-        <!-- Actions -->
         <div class="profile-actions" *ngIf="isEditing()">
           <button class="cancel-button" (click)="toggleEdit()" [disabled]="loading()">Cancel</button>
           <button class="save-button" (click)="saveChanges()" [disabled]="loading()">
@@ -92,22 +81,19 @@
           </button>
         </div>
 
-        <!-- ===================== -->
-        <!-- STATISTIKEN SECTION -->
-        <!-- ===================== -->
-
+        <!-- Statistiken-->
         <div class="stats-section">
           <h2 class="stats-title">Statistiken</h2>
 
           <div class="stats-grid">
             <div class="stat-card">
               <p class="stat-label">Tours</p>
-              <h3 class="stat-value">0</h3> <!-- Platzhalter -->
+              <h3 class="stat-value">0</h3>
             </div>
 
             <div class="stat-card">
               <p class="stat-label">Tour Logs</p>
-              <h3 class="stat-value">0</h3> <!-- Platzhalter -->
+              <h3 class="stat-value">0</h3>
             </div>
           </div>
         </div>

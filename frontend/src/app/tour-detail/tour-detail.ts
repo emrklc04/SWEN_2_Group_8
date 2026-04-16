@@ -19,13 +19,13 @@ import * as L from 'leaflet';
 export class TourDetail implements OnInit {
   @ViewChild('mapContainer') mapContainer!: ElementRef;
 
-  // Tour properties
+  // Tour Eigenschaften
   tour: Tour | null = null;
   currentUser = signal<any>(null);
   loading = signal(true);
   map: any;
 
-  // Tour Logs properties
+  // Tour Logs Eigenschaften
   tourLogs = signal<TourLog[]>([]);
   showLogModal = signal(false);
   showEditLogModal = signal(false);
@@ -34,7 +34,7 @@ export class TourDetail implements OnInit {
   logMessage = signal('');
   logMessageType = signal<'success' | 'error'>('error');
 
-  // Form fields for Tour Logs
+
   logDateTime = signal('');
   logComment = signal('');
   logDifficulty = signal<'easy' | 'medium' | 'hard'>('medium');
@@ -109,6 +109,7 @@ export class TourDetail implements OnInit {
      );
    }
 
+  // Berechnet die Bounding Box (min/max Koordinaten)
    private calculateBBox(coordinates: [number, number][]): number[] {
      if (coordinates.length === 0) return [0, 0, 0, 0];
 
@@ -131,7 +132,7 @@ export class TourDetail implements OnInit {
      this.tourLogs.set(this.tourLogService.getTourLogs().filter(log => log.tourId === tourId));
    }
 
-
+  // Initialisiert die Leaflet-Karte
    initMap(): void {
      if (!this.mapContainer || !this.tour) return;
      this.map = L.map(this.mapContainer.nativeElement).setView([51.505, -0.09], 4);
@@ -139,6 +140,7 @@ export class TourDetail implements OnInit {
      this.displayRoute();
    }
 
+   // Zeichnet die Route auf der Karte
    displayRoute(): void {
      if (!this.tour?.routeInformation?.coordinates || this.tour.routeInformation.coordinates.length === 0) {
        L.marker([51.505, -0.09]).addTo(this.map).bindPopup(`${this.tour?.from} → ${this.tour?.to}`);
@@ -153,7 +155,7 @@ export class TourDetail implements OnInit {
      }
    }
 
-   // Tour Log Modal Methods
+   // Tour Log Modal Methoden
   openLogModal(): void {
     this.showLogModal.set(true);
     this.resetLogForm();
@@ -195,6 +197,7 @@ export class TourDetail implements OnInit {
     this.logLoading.set(false);
   }
 
+  // Erstellt neuen Tour Log
    async onSubmitTourLog(): Promise<void> {
      this.logLoading.set(true);
      this.logMessage.set('');
@@ -264,7 +267,7 @@ export class TourDetail implements OnInit {
      if (confirm('Are you sure you want to delete this tour log?')) this.tourLogService.deleteTourLog(logId);
    }
 
-   // Utility methods
+   //Hilfsmethoden
    backToDashboard(): void { this.router.navigate(['/dashboard']); }
 
    getTransportIcon(type: string): string {

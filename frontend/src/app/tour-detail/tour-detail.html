@@ -13,29 +13,28 @@
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Hauptinhalt -->
   <main class="flex-grow-1 p-4">
     <div class="container-fluid">
-      <!-- Loading State -->
+      <!-- Ladezustand -->
       <div *ngIf="loading()" class="alert alert-info text-center">Loading...</div>
 
-      <!-- Tour Detail Container -->
+      <!-- Tour Detail Bereich -->
       <div *ngIf="!loading() && tour">
-        <!-- Back Button -->
         <button class="btn btn-link btn-sm text-decoration-none mb-3" (click)="backToDashboard()">
           ← Back to Tours
         </button>
 
-        <!-- Detail Grid: Info Card + Map -->
+        <!-- Detail Layout: Info Card + Karte -->
         <div class="row g-4 mb-5">
-          <!-- Left Section: Tour Info -->
+          <!-- Linker Bereich: Tour Info -->
           <div class="col-12 col-lg-6">
             <div class="card shadow-sm h-100">
               <div class="card-body">
                 <h2 class="card-title">{{ tour.name }}</h2>
                 <p class="text-muted" *ngIf="tour.description">{{ tour.description }}</p>
 
-                <!-- From/To Info -->
+                <!-- Start/Ziel Info -->
                 <div class="row my-3">
                   <div class="col-6">
                     <p class="text-muted mb-1" style="font-size: 12px;">From</p>
@@ -47,7 +46,7 @@
                   </div>
                 </div>
 
-                <!-- Metrics -->
+                <!-- Distanz/Zeit -->
                 <div class="row g-3 my-3">
                   <div class="col-6">
                     <div class="d-flex align-items-center gap-2">
@@ -69,13 +68,13 @@
                   </div>
                 </div>
 
-                <!-- Transport Type -->
+                <!-- Transportart -->
                 <span class="badge bg-dark">{{ getTransportIcon(tour.transportType) }} {{ tour.transportType | uppercase }}</span>
               </div>
             </div>
           </div>
 
-          <!-- Right Section: Map -->
+          <!-- Rechter Bereich: Karte -->
           <div class="col-12 col-lg-6">
             <div class="card shadow-sm h-100">
               <div class="card-body p-0" style="overflow: hidden;">
@@ -86,7 +85,7 @@
           </div>
         </div>
 
-        <!-- Tour Logs Section -->
+        <!-- Tour Logs Bereich -->
         <div class="my-5">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h3 class="mb-0">Tour Logs</h3>
@@ -120,7 +119,6 @@
         </div>
       </div>
 
-      <!-- Error State -->
       <div *ngIf="!loading() && !tour" class="alert alert-danger">
         <p>Tour not found</p>
         <button class="btn btn-secondary btn-sm" (click)="backToDashboard()">Back to Dashboard</button>
@@ -128,7 +126,7 @@
     </div>
   </main>
 
-   <!-- Create/Edit Tour Log Modals -->
+   <!-- Create/Edit Tour Logs -->
    <ng-container *ngFor="let isEdit of [false, true]">
      <div class="modal fade" *ngIf="(isEdit ? showEditLogModal() : showLogModal())" [attr.data-edit]="isEdit" (click)="isEdit ? closeEditLogModal() : closeLogModal()" [class.show]="true" style="display: block; background: rgba(0, 0, 0, 0.3);">
        <div class="modal-dialog" (click)="$event.stopPropagation()">
